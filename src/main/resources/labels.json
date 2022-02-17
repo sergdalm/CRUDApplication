@@ -1,8 +1,4 @@
-package src.main.resources;
-
-
-
-class JsonLebelRepositoryImpl implements WriterRepository {
-  @Test
-
+{
+  "id": 0,
+  "name": "Hi"
 }

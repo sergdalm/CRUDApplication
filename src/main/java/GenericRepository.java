@@ -8,7 +8,7 @@ public interface GenericRepository<T, ID> {
 
     T save(T obj);
 
-    T update(ID id, T obj);
+    T update(T obj);
 
     Map<ID, T> getAll();
 

@@ -1,10 +1,13 @@
-public class Label {
-    private java.awt.Label label;
+import java.io.Serializable;
+
+public class Label implements Serializable {
+    static private int idCount;
     private int id;
     private String name;
 
-    public java.awt.Label getLabel() {
-        return label;
+    public Label(String name) {
+        this.name = name;
+        id = idCount++;
     }
 
     public int getId() {
@@ -13,14 +16,6 @@ public class Label {
 
     public String getName() {
         return name;
-    }
-
-    public void setLabel(java.awt.Label label) {
-        this.label = label;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public void setName(String name) {
