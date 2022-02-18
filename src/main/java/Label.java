@@ -10,8 +10,20 @@ public class Label implements Serializable {
         id = idCount++;
     }
 
+    @Override
+    public String toString() {
+        return "Label{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
+
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -21,4 +33,5 @@ public class Label implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
+
 }

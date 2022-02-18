@@ -1,6 +1,6 @@
 // Interface for all repositories
 
-import java.util.Map;
+import java.util.List;
 
 public interface GenericRepository<T, ID> {
 
@@ -8,10 +8,13 @@ public interface GenericRepository<T, ID> {
 
     T save(T obj);
 
-    T update(T obj);
+    void update(T obj);
 
-    Map<ID, T> getAll();
+    List<T> getAll();
 
     void deleteById(ID id);
+
+    // Save content of repository into json file
+    void saveRepository();
 
 }
