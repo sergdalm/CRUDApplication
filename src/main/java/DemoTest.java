@@ -10,10 +10,10 @@ public class DemoTest {
     public static void main(String[] args) throws HeadlessException {
         LabelRepository labelRepository = new LabelRepository();
 
-//        Label label = new Label("Hi");
-//        labelRepository.save(label);
+        Label label = new Label("Hi");
+        labelRepository.save(label);
 
-        labelRepository.deleteById(0);
+//        labelRepository.deleteById(0);
 
     }
 }

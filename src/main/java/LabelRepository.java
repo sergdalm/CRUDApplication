@@ -5,11 +5,9 @@ import com.google.gson.internal.bind.util.ISO8601Utils;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -28,17 +26,16 @@ public class LabelRepository implements GenericRepository<Label, Integer>, Seria
     @Override
     public Label save(Label label) {
         labels.put(label.getId(), label);
+        String json = gson.toJson(labels);
 
-        // Save into labels.json
-        String json = gson.toJson(label, Label.class);
-        try(OutputStream fout = new BufferedOutputStream(
-                Files.newOutputStream(path))) {
-            fout.write(json.getBytes());
-        } catch (InvalidPathException e) {
-            System.out.println("Path Error " + e);
+        try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(path.toFile()))) {
+            fileWriter.append(json);
+            fileWriter.append('\n');
         } catch (IOException e) {
-            System.out.println("I/O Error: " + e);
+            e.printStackTrace();
         }
+
+
         return label;
     }
 
@@ -57,18 +54,15 @@ public class LabelRepository implements GenericRepository<Label, Integer>, Seria
 
     @Override
     public void deleteById(Integer id) {
-//        if(labels.remove(id) == null)
-//            throw new NoSuchElementException();
-//        StringBuilder stringBuilder = new StringBuilder();
-//        inc count = 0;
-//        try(FileReader fr = new FileReader("src/main/resources/labels.json")) {
-//            int c;
-//            while((c = fr.read()) != -1)
-//                stringBuilder.insert(count++, c)
-//        } catch (IOException e) {
-//            System.out.println("I/O Error: " + e);
-//        }
-//        String json =
-//        Label read = gson.fromJson(path, Label.class);
+
+        try{
+            String json = Files.readString(path);
+            Label read = gson.fromJson(json, Label.class);
+            System.out.println(read);
+            System.out.println(read);
+        } catch (IOException exc) {
+            exc.printStackTrace();
+        }
+
     }
 }
