@@ -1,4 +1,4 @@
-// Interface for all repositories
+package repository;// Interface for all repositories
 
 import java.util.List;
 

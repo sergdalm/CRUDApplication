@@ -1,6 +1,10 @@
+package repository;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import model.Label;
+
 import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.file.*;

@@ -1,10 +1,12 @@
+import model.Label;
+import repository.JsonLabelRepositoryImpl;
 
 public class DemoTest {
     public static void main(String[] args) {
         JsonLabelRepositoryImpl labelRepository = new JsonLabelRepositoryImpl();
 
-//        Label label = new Label("Hi");
-//        Label label2 = new Label("Bye");
+//        model.Label label = new model.Label("Hi");
+//        model.Label label2 = new model.Label("Bye");
 //        labelRepository.save(label);
 //        labelRepository.save(label2);
 

@@ -1,4 +1,4 @@
-// This class contains only getters and setters
+package model;// This class contains only getters and setters
 import java.util.List;
 
 public class Writer {

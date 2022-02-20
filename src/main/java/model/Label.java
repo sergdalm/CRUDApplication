@@ -1,3 +1,5 @@
+package model;
+
 import java.io.Serializable;
 
 public class Label implements Serializable {
@@ -12,7 +14,7 @@ public class Label implements Serializable {
 
     @Override
     public String toString() {
-        return "Label{" +
+        return "model.Label{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 '}';
