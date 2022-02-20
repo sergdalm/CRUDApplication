@@ -8,13 +8,10 @@ public interface GenericRepository<T, ID> {
 
     T save(T obj);
 
-    void update(T obj);
+    T update(T obj);
 
     List<T> getAll();
 
     void deleteById(ID id);
-
-    // Save content of repository into json file
-    void saveRepository();
 
 }

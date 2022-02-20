@@ -1,15 +1,14 @@
 package model;
 
-import java.io.Serializable;
-
-public class Label implements Serializable {
-    static private int idCount;
-    private int id;
+public class Label {
+    private Integer id;
     private String name;
+
+    public Label() {
+    }
 
     public Label(String name) {
         this.name = name;
-        id = idCount++;
     }
 
     @Override
@@ -20,11 +19,11 @@ public class Label implements Serializable {
                 '}';
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

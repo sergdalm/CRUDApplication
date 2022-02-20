@@ -1,4 +1,4 @@
-package repository;
+package repository.gson;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class JsonWriterRepositoryImpl implements WriterRepository {
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private Path path = Path.of("src", "main", "resources", "writers.json");
+    private final Path path = Path.of("src", "main", "resources", "writers.json");
     private Map<Integer, Writer> writers;
     private int idCount;
 
@@ -52,8 +52,8 @@ public class JsonWriterRepositoryImpl implements WriterRepository {
     }
 
     @Override
-    public void update(Writer obj) {
-
+    public Writer update(Writer obj) {
+        return null;
     }
 
     @Override
@@ -66,8 +66,7 @@ public class JsonWriterRepositoryImpl implements WriterRepository {
 
     }
 
-    @Override
-    public void saveRepository() {
+    private void saveRepository() {
 
     }
 }
