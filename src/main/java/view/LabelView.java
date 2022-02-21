@@ -7,10 +7,13 @@ import java.util.Scanner;
 public class LabelView {
     private final Scanner scanner;
     LabelController labelController;
+    private final int ACTION_ON_LABEL = 1;
+    private final int LABELS_COUNT;
 
     public LabelView() {
         this.scanner = new Scanner(System.in);
         labelController = new LabelController();
+        LABELS_COUNT = labelController.getLabelCount();
     }
 
     public void createLabel() {
@@ -37,4 +40,42 @@ public class LabelView {
         labelController.saveLabel(name);
         System.out.println("Created label: " + name);
     }
+
+    public void showAllLabel() {
+        System.out.println(labelController.getAllLabelsIdAndName());
+
+    }
+
+    public void deleteLabel() {
+        System.out.println("Enter label's number which you want to delete (0 for back)");
+        showAllLabel();
+        int input = getNumberFromUser(0, LABELS_COUNT);
+        if(input == 0)
+            return;
+        String deletedLabel = labelController.getLabelName(input);
+        labelController.deleteBuId(input);
+        System.out.println("Label " + deletedLabel + " has been deleted.");
+    }
+
+    private int getNumberFromUser(int min, int max) {
+        int result = min - 1;
+        do {
+            try{
+                result = scanner.nextInt();
+            } catch (Exception exc) {
+                scanner.next();
+            }
+        } while(result < min || result > max);
+        return result;
+    }
+
+    public void changeLabel() {
+
+    }
+
+    public void menu() {
+    }
+
+
+
 }
