@@ -102,5 +102,19 @@ public class JsonWriterRepositoryImpl implements WriterRepository {
         }
     }
 
+    @Override
+    public Writer getWriterByName(String firstName, String lastName) {
+        List<Writer> writers = getAllWriters();
+        return writers.stream()
+                .filter(w -> w.getFirstName().equals(firstName))
+                .filter(w -> w.getLastName().equals(lastName))
+                .findFirst()
+                .orElse(null);
+    }
+    @Override
+    public boolean isExisting(String firstName, String lastName) {
+        return getWriterByName(firstName, lastName) != null;
+    }
+
 
 }

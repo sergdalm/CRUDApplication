@@ -96,4 +96,6 @@ public class JsonLabelRepositoryImpl implements LabelRepository {
             return Objects.nonNull(labelsWithMaxId) ? labelsWithMaxId.getId() + 1 : 1;
         }
     }
+
+
 }

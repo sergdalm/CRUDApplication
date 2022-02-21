@@ -1,11 +1,11 @@
 package controller;
 
 import model.Label;
-import model.Writer;
 import repository.LabelRepository;
 import repository.gson.JsonLabelRepositoryImpl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class LabelController {
     private final LabelRepository labelRepository = new JsonLabelRepositoryImpl();
@@ -39,8 +39,31 @@ public class LabelController {
         return labels.size();
     }
 
-    public void deleteBuId(Integer id) {
+    public String getAllLabelsSeparatedByComma() {
+        List<Label> labels = labelRepository.getAll();
+        String result = labels.stream()
+                .map(Label::getName)
+                .collect(Collectors.joining(", "));
+        return result;
+    }
+
+    public void deleteById(Integer id) {
         labelRepository.deleteById(id);
     }
 
+    public void update(Integer id, String newName) {
+       labelRepository.getById(id).setName(newName);
+
+    }
+
+    public boolean isExisting(String name) {
+        return getLabelByName(name) != null;
+    }
+
+    public Label getLabelByName(String name) {
+        return labelRepository.getAll().stream()
+                .filter(label -> label.getName().equals(name))
+                .findFirst()
+                .orElse(null);
+    }
 }
