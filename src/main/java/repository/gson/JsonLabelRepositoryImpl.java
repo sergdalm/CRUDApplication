@@ -16,9 +16,6 @@ public class JsonLabelRepositoryImpl implements LabelRepository {
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final Path path = Path.of("src", "main", "resources", "labels.json");
 
-//    public JsonLabelRepositoryImpl() {
-//    }
-
     @Override
     public Label getById(Integer id) {
         return getAllLabels().stream()

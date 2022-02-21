@@ -2,7 +2,7 @@ package view;
 
 import controller.WriterController;
 import model.Post;
-import model.Writer;
+
 
 import java.util.List;
 import java.util.Scanner;
@@ -113,45 +113,6 @@ public class WriterView {
         System.out.println("Enter post's to edit: ");
     }
 
-//    public void menu() {
-//        int input = -1;
-//        while(input != 0){
-//            System.out.println("Chose action (enter number, 0 for back): ");
-//            System.out.println("   1. Create new writer");
-//            System.out.println("   2. Change existing writer");
-//            System.out.println("   3. Delete writer");
-//            System.out.println("   4. Show all writers");
-//            input = getNumberFromUser(0, ACTIONS_ON_WRITER);
-//            int writersCount = writerController.writersCount();
-//            switch (input) {
-//                case 0:
-//                    return;
-//                case 1:
-//                    createWriter();
-//                    break;
-//                case 2:
-//                    if(writersCount == 0)
-//                        System.out.println("There is no writers to change.");
-//                    else
-//                        changeWriter();
-//                    break;
-//                case 3:
-//                    if(writersCount == 0)
-//                    System.out.println("There is no writers to delete.");
-//                    else
-//                        deleteWriter();
-//                    break;
-//                case 4:
-//                    if(writersCount == 0)
-//                        System.out.println("There is no exiting writers.");
-//                    else
-//                        showAllWriters();
-//                    break;
-//            }
-//        }
-//    }
-
-
     private int getNumberFromUser(int min, int max) {
         int result = min - 1;
         do {
@@ -172,7 +133,6 @@ public class WriterView {
             for(Post post : posts)
                 System.out.println(post);
         }
-
     }
 
     public void addNewPost(Integer id, Post post) {

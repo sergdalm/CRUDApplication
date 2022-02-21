@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 public class LabelView {
     private final Scanner scanner;
-    LabelController labelController;
+    private final LabelController labelController;
     private final int LABELS_COUNT;
 
     public LabelView() {

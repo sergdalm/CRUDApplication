@@ -10,9 +10,6 @@ import java.util.stream.Collectors;
 public class LabelController {
     private final LabelRepository labelRepository = new JsonLabelRepositoryImpl();
 
-//    public LabelController() {
-//    }
-
     public Label saveLabel(String name) {
         Label label = new Label(name);
         return labelRepository.save(label);
@@ -41,10 +38,9 @@ public class LabelController {
 
     public String getAllLabelsSeparatedByComma() {
         List<Label> labels = labelRepository.getAll();
-        String result = labels.stream()
+        return labels.stream()
                 .map(Label::getName)
                 .collect(Collectors.joining(", "));
-        return result;
     }
 
     public void deleteById(Integer id) {
