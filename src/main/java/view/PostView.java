@@ -19,11 +19,13 @@ public class PostView {
     }
 
     public Post createPost() {
+        System.out.println("Write post's title and press \"Enter\":");
+        String title = scanner.nextLine();
         System.out.println("Write post and press \"Enter\":");
         String content = scanner.nextLine();
         System.out.println("Please set labels.");
         List<Label> labels = setLabels();
-        return postController.savePost(content, labels);
+        return postController.savePost(title, content, labels);
     }
 
 

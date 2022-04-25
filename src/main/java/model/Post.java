@@ -11,12 +11,14 @@ import java.util.List;
 @Setter
 public class Post {
     private Integer id;
+    private String title;
     private String content;
     private Instant created;
     private Instant updated;
     private List<Label> labels;
 
-    public Post(String content, List<Label> labels) {
+    public Post(String title, String content, List<Label> labels) {
+        this.title = title;
         this.content = content;
         this.created = Instant.now();
         this.labels = labels;

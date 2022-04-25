@@ -14,8 +14,8 @@ public class PostController {
      public PostController() {
      }
 
-     public Post savePost(String content, List<Label> labels) {
-         Post post = new Post(content, labels);
+     public Post savePost(String title, String content, List<Label> labels) {
+         Post post = new Post(title, content, labels);
          return postRepository.save(post);
      }
 
