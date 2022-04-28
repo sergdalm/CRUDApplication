@@ -3,6 +3,7 @@ package repository.gson;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import dto.LabelDto;
 import model.Label;
 import repository.LabelRepository;
 
@@ -53,10 +54,21 @@ public class JsonLabelRepositoryImpl implements LabelRepository {
 
 
     @Override
-    public void deleteById(Integer id) {
+    public boolean deleteById(Integer id) {
         List<Label> currentLabels = getAllLabels();
         currentLabels.removeIf(label -> label.getId().equals(id));
         writeAllLabels(currentLabels);
+        return true;
+    }
+
+    @Override
+    public void matchLabelWithPost(Label label, Integer postId) {
+
+    }
+
+    @Override
+    public List<Label> getLabelsByPostId(Integer postId) {
+        return null;
     }
 
     private List<Label> getAllLabels() {

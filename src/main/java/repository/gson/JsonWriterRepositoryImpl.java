@@ -60,10 +60,16 @@ public class JsonWriterRepositoryImpl implements WriterRepository {
     }
 
     @Override
-    public void deleteById(Integer id) {
+    public boolean deleteById(Integer id) {
         List<Writer> currentWriters = getAllWriters();
         currentWriters.removeIf(writer -> writer.getId().equals(id));
         writeAllWriters(currentWriters);
+        return true;
+    }
+
+    @Override
+    public Optional<Writer> getWriterByEmail(String email) {
+        return Optional.empty();
     }
 
     private List<Writer> getAllWriters() {
@@ -111,10 +117,4 @@ public class JsonWriterRepositoryImpl implements WriterRepository {
                 .findFirst()
                 .orElse(null);
     }
-    @Override
-    public boolean isExisting(String firstName, String lastName) {
-        return getWriterByName(firstName, lastName) != null;
-    }
-
-
 }

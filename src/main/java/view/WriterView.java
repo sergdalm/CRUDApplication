@@ -1,61 +1,72 @@
 package view;
 
-import controller.WriterController;
-import model.Post;
+import controller.console.WriterController;
+import dto.LoginWriterDto;
+import dto.PostDto;
+import dto.WriterDto;
+import exceptions.LoginErrorException;
 
 
 import java.util.List;
-import java.util.Scanner;
 
 public class WriterView {
     private final WriterController writerController;
-    private final Scanner scanner;
+    private final InputManager inputManager;
+    private final PostView postView;
 
     public WriterView() {
         writerController = new WriterController();
-        scanner = new Scanner(System.in);
+        postView = new PostView();
+        inputManager = InputManager.getInstance();
+
     }
 
     public void showAllWriters() {
-        String allWriterIdAndNames = writerController.getAllWriterIdAndNames();
-        System.out.println(allWriterIdAndNames);
+        System.out.println("Writers:");
+        int input;
+        do {
+            List<WriterDto> writers = writerController.getAllWriters();
+            int count = 1;
+            for (WriterDto writer : writers) {
+                System.out.println(count++ + ". " + writer.getFirstName() + " " + writer.getLastName());
+            }
+            System.out.println("Enter writer's id to see writer's post (0 for back):");
+            input = inputManager.getNumberFromUserBetweenMinAndMax(0, writers.size());
+            if (input != 0) {
+                Integer writerId = writers.get(input - 1).getId();
+                postView.showPostsByWriterId(writerId);
+            }
+        } while(input != 0);
     }
 
-    public void createWriter() {
-        System.out.println("Enter writer's first name: ");
-        String firstName = inputFirstName();
+    public LoginWriterDto createWriter() {
+        System.out.println("Enter your first name: ");
+        String firstName = inputManager.inputWithoutSpaces();
 
-        System.out.println("Enter writer's last name: ");
-        String lastName = inputLastName();
+        System.out.println("Enter your last name: ");
+        String lastName = inputManager.inputWithoutSpaces();
 
-        writerController.saveWriter(firstName, lastName);
+        System.out.println("Enter your email last name: ");
+        String email = inputManager.inputWithoutSpaces();
+
+        System.out.println("Enter your password last name: ");
+        String password = inputManager.inputWithoutSpaces();
+
+        writerController.saveWriter(firstName, lastName, email, password);
+
 
         System.out.println("Writer created: " + firstName + " " + lastName);
+
+        return null;
     }
 
-    public void changeWriter() {
-        Integer writersCount = writerController.writersCount();
-
-        System.out.println("Enter writer's number who you want to change: (0 for back)");
-        showAllWriters();
-
-        int input = getNumberFromUser(0, writersCount);
-
-        if(input == 0)
-            return;
-
-        String previousName = writerController.getWriterFullName(input);
-
-        System.out.println("You chose writer " + previousName);
-        changeWriter(input);
-    }
 
     public void changeWriter(Integer id) {
         String previousName = writerController.getWriterFullName(id);
         System.out.println("Enter new writer's first name: ");
-        String firstName = inputFirstName();
+        String firstName = inputManager.inputWithoutSpaces();
         System.out.println("Enter new writer's last name: ");
-        String lastName = inputLastName();
+        String lastName = inputManager.inputWithoutSpaces();
 
         writerController.update(id, firstName, lastName);
         String newName = firstName + " " + lastName;
@@ -63,32 +74,6 @@ public class WriterView {
         System.out.println(previousName + " -> " + newName);
     }
 
-    private String inputFirstName() {
-        String firstName;
-        do {
-            firstName = scanner.nextLine();
-        } while(firstName.equals(""));
-        return firstName;
-    }
-
-    private String inputLastName() {
-        String lastName;
-        do {
-            lastName = scanner.nextLine();
-        } while(lastName.equals(""));
-        return lastName;
-    }
-
-    public void deleteWriter() {
-        System.out.println("Enter writer's number who you want to delete (0 for back)");
-        showAllWriters();
-        Integer writersCount = writerController.writersCount();
-        int input = getNumberFromUser(0, writersCount);
-        if(input == 0)
-            return;
-        String deletedWriterName = writerController.getWriterFullName(input);
-        deleteWriter(input);
-    }
 
     public void deleteWriter(Integer id) {
         String deletedWriterName = writerController.getWriterFullName(id);
@@ -96,55 +81,36 @@ public class WriterView {
         System.out.println("Writer " + deletedWriterName + " has been deleted.");
     }
 
-    public void showWriterToSeePosts() {
-        showAllWriters();
 
-        System.out.println("Enter writer's id to see writer's post (0 for back):");
-        int writersCount = writerController.writersCount();
-        int input = getNumberFromUser(0, writersCount);
-        if(input == 0)
-            return;
-        writerController.getWriterById(input);
-        writerController.getAllPostsByWriterId(input);
-    }
-
-    public void changeWriterPost(Integer writerId) {
-        showWriterPosts(writerId);
-        System.out.println("Enter post's to edit: ");
-    }
-
-    private int getNumberFromUser(int min, int max) {
-        int result = min - 1;
-        do {
-            try{
-                result = scanner.nextInt();
-            } catch (Exception exc) {
-                scanner.next();
+    public LoginWriterDto login() {
+        for (; ; ) {
+            System.out.println("Enter your email:");
+            String email = inputManager.inputWithoutSpaces().toLowerCase();
+            System.out.println("Enter your password:");
+            String password = inputManager.inputWithoutSpaces();
+            try {
+                return writerController.loginWriter(email, password);
+            } catch (LoginErrorException e) {
+                System.out.println(e.getLocalizedMessage());
+                System.out.println("Do you want to create new account?");
+                System.out.println("Type \"create\" to create a new account.");
+                String maybeCreate = inputManager.inputWithoutSpaces();
+                if (maybeCreate.equalsIgnoreCase("create")) {
+                    return createWriter();
+                }
             }
-        } while(result < min || result > max);
-        return result;
-    }
-
-    public void showWriterPosts(Integer id) {
-        List<Post> posts = writerController.getWriterById(id).getPosts();
-        if(posts.size() == 0)
-            System.out.println("There is no posts yet.");
-        else {
-            for(Post post : posts)
-                System.out.println(post);
         }
+
     }
 
-    public void addNewPost(Integer id, Post post) {
-        writerController.addNewPost(id, post);
-    }
 
-    public Integer createWriterIfNotExisting(String firstName, String lastName) {
-        return writerController.saveIfNotExisting(firstName, lastName).getId();
-    }
-
-    public void showWriterName(Integer id) {
+    public void showWriterName(Integer id){
         System.out.println(writerController.getWriterById(id).getFirstName()
                 + writerController.getWriterById(id).getLastName());
     }
+
+    public void addWriterPost(Integer writerId, PostDto post) {
+
+    }
 }
+

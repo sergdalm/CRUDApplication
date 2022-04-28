@@ -1,10 +1,12 @@
 package repository;// Interface for all repositories
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
-public interface GenericRepository<T, ID> {
+public interface GenericRepository<T, K> {
 
-    T getById(ID id);
+    T getById(K id);
 
     T save(T obj);
 
@@ -12,6 +14,5 @@ public interface GenericRepository<T, ID> {
 
     List<T> getAll();
 
-    void deleteById(ID id);
-
+    boolean deleteById(K id);
 }

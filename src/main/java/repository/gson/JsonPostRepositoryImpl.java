@@ -3,6 +3,7 @@ package repository.gson;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import model.Label;
 import model.Post;
 import repository.PostRepository;
 
@@ -13,6 +14,7 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,7 +24,7 @@ public class JsonPostRepositoryImpl implements PostRepository {
     private final Path path = Path.of("src", "main", "resources", "posts.json");
     @Override
     public Post getById(Integer id) {
-        return getAllPosts().stream()
+        return getAll().stream()
                 .filter(l -> l.getId().equals(id))
                 .findFirst()
                 .orElse(null);
@@ -30,7 +32,7 @@ public class JsonPostRepositoryImpl implements PostRepository {
 
     @Override
     public Post save(Post post) {
-        List<Post> currentPosts = getAllPosts();
+        List<Post> currentPosts = getAll();
         Integer newId = generateMaxId(currentPosts);
         post.setId(newId);
         currentPosts.add(post);
@@ -40,11 +42,11 @@ public class JsonPostRepositoryImpl implements PostRepository {
 
     @Override
     public Post update(Post updatedPost) {
-        List<Post> currentPosts = getAllPosts();
+        List<Post> currentPosts = getAll();
         currentPosts.forEach(post -> {
             if(post.getId().equals(updatedPost.getId())) {
                 post.setContent(updatedPost.getContent());
-                post.setUpdated(Instant.now());
+                post.setUpdated(LocalDateTime.now());
             }
         });
         writeAllPosts(currentPosts);
@@ -53,17 +55,6 @@ public class JsonPostRepositoryImpl implements PostRepository {
 
     @Override
     public List<Post> getAll() {
-        return getAllPosts();
-    }
-
-    @Override
-    public void deleteById(Integer id) {
-        List<Post> currentPosts = getAllPosts();
-        currentPosts.removeIf(post -> post.getId().equals(id));
-        writeAllPosts(currentPosts);
-    }
-
-    List<Post> getAllPosts() {
         List<Post> posts;
         try {
             String json = Files.readString(path);
@@ -75,6 +66,19 @@ public class JsonPostRepositoryImpl implements PostRepository {
         return Objects.isNull(posts) ? new ArrayList<>() : posts;
     }
 
+    @Override
+    public boolean deleteById(Integer id) {
+        List<Post> currentPosts = getAll();
+        currentPosts.removeIf(post -> post.getId().equals(id));
+        writeAllPosts(currentPosts);
+        return true;
+    }
+
+    @Override
+    public List<Post> getPostsByWriterId(Integer writerId) {
+        return null;
+    }
+
     private void writeAllPosts(List<Post> posts) {
         String json = gson.toJson(posts);
 
@@ -84,6 +88,16 @@ public class JsonPostRepositoryImpl implements PostRepository {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void matchPostWithWriter(Integer postId, Integer writerId) {
+
+    }
+
+    @Override
+    public void matchPostWithLabels(Integer postId, List<Label> labels) {
+
     }
 
     private Integer generateMaxId(List<Post> posts) {

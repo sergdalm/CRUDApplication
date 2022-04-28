@@ -1,83 +1,158 @@
 package view;
 
-import controller.LabelController;
-import controller.PostController;
+import controller.console.LabelController;
+import controller.console.PostController;
+import dto.LabelDto;
+import dto.PostDto;
+import liquibase.pro.packaged.L;
 import model.Label;
 import model.Post;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class PostView {
     private final PostController postController;
-    private final Scanner scanner;
+    private final InputManager inputManager;
+    private final LabelView labelView;
+    private final String dateTimeFormat = "dd.MM.yyyy hh:mm:ss";
 
     public PostView() {
-        postController = new PostController();
-        scanner = new Scanner(System.in);
+        postController = PostController.getInstance();
+        inputManager = InputManager.getInstance();
+        labelView = new LabelView();
     }
 
-    public Post createPost() {
-        System.out.println("Write post's title and press \"Enter\":");
-        String title = scanner.nextLine();
-        System.out.println("Write post and press \"Enter\":");
-        String content = scanner.nextLine();
-        System.out.println("Please set labels.");
-        List<Label> labels = setLabels();
-        return postController.savePost(title, content, labels);
-    }
-
-
-    private List<Label> setLabels() {
-        String stopWord = "0";
-        System.out.println("You can choose among existing labels or create new");
-        LabelView labelView = new LabelView();
-        labelView.showAllLabelsSeparatedByComma();
-        LabelController labelController= new LabelController();
-
-        System.out.println("To set labels write label and press\"Enter\" (press '" + stopWord + "' to stop)");
-        List<Label> labels = new ArrayList<>();
-        String input = "";
-        while(!input.equals(stopWord)) {
-            input = labelView.getNameFromUser("0");
-            if(!input.equals(stopWord)) {
-                labelController.saveLabel(input);
+    public void userPostsMenu(Integer writerId) {
+        int input;
+        do {
+            System.out.println("Enter number (0 for back)");
+            System.out.println("  1. See your posts");
+            System.out.println("  2. Write new post");
+            input = inputManager.getNumberFromUserBetweenMinAndMax(0, 2);
+            switch (input) {
+                case(1) :
+                    var postId = showPostsByWriterId(writerId);
+                    if(postId > 0)
+                        postMenu(postId);
+                    break;
+                case(2) :
+                    createPost(writerId);
+                    break;
             }
-        }
-        return labels;
-    }
-    public void deletePost(Integer id) {
-        String content = postController.getPostById(id).getContent();
-        postController.getPostById(id);
-        System.out.println("This post has been deleted:");
-        System.out.println(content);
-        System.out.println("Write new text and press \"Enter\":");
-        String newContent = scanner.nextLine();
-        System.out.println("Current post's labels: ");
-        postController.getLabelsAsStringSeparatedByComma(id);
-        System.out.println("Set new labels");
-        List<Label> newLabels = setLabels();
-        postController.updatePost(id, content, newLabels);
-        System.out.println("Post has been changed:");
-        showPost(id);
+        } while(input != 0);
     }
 
-    public void changePost(Integer id) {
-        String content = postController.getPostById(id).getContent();
-        System.out.println("Current post content: ");
-        System.out.println(content);
+    public PostDto createPost(Integer writerId) {
+        String title = inputPostTitle();
+        String content = inputPostContent();
+        List<LabelDto> labels = setLabels();
+        return postController.savePost(writerId, title, content, labels);
+    }
+
+    public Integer showPostsByWriterId(Integer writerId) {
+        var posts = postController.getPostsByWriterId(writerId);
+        if(posts.size() == 0) {
+            System.out.println("There are no posts yet.");
+            return 0;
+        } else {
+            showPostsTitles(posts);
+            System.out.println("Enter post's number to see its content: (0 for back)");
+            int postsAmount = posts.size();
+            int postNumber = inputManager.getNumberFromUserBetweenMinAndMax(0, postsAmount + 1);
+            if(postNumber == 0) {
+                return 0;
+            }
+            Integer postId = posts.get(postNumber - 1).getId();
+            showPost(postId);
+            return postId;
+        }
+    }
+
+    private void postMenu(Integer postId) {
+        int input;
+        do {
+            System.out.println("\nChose number from menu: (0 for back)");
+            System.out.println("1. Change post");
+            System.out.println("2. Delete post");
+            input = inputManager.getNumberFromUserBetweenMinAndMax(0, 2);
+            switch (input) {
+                case(1):
+                    updatePost(postId);
+                    break;
+                case(2):
+                    deletePost(postId);
+                    break;
+            }
+        } while(input != 0);
+    }
+
+    public void deletePost(Integer id) {
+         if(postController.deletePost(id)) {
+             System.out.println("Post has been deleted.");
+        }
     }
 
     public void showPost(Integer id) {
-        System.out.println(postController.getPostById(id));
+        var post = postController.getPostById(id);
+        System.out.println(post.getTitle());
+        System.out.println(post.getContent());
+        System.out.println("Post created: " + post.getCreated().format(DateTimeFormatter.ofPattern(dateTimeFormat)));
+        if(post.getUpdated() != null) {
+            System.out.println("Post updated: " + post.getUpdated().format(DateTimeFormatter.ofPattern(dateTimeFormat)));
+        }
+        if(post.getLabels() != null && post.getLabels().size() > 0) {
+            System.out.print("Post labels: ");
+            labelView.showLabelsForPost(post.getId());
+        }
+        System.out.println();
     }
 
     public void showAllPosts() {
+        System.out.println("Chose a post you want to read: (0 for back)");
+        var allPosts = postController.getAllPosts();
+
+        showPostsTitles(allPosts);
+        int input;
+        do {
+            input = inputManager.getNumberFromUserBetweenMinAndMax(0, allPosts.size());
+            if(input != 0) {
+                showPost(allPosts.get(input - 1).getId());
+            }
+        } while(input != 0);
 
     }
 
-    public void showWriterPost(List<Post> writerPosts) {
-        System.out.println(postController.getWriterPost(writerPosts));
+    public void showPostsTitles(List<PostDto> posts) {
+        int count = 1;
+        for (PostDto post : posts) {
+            System.out.println(count++ + ". " + post.getTitle());
+        }
+    }
+
+    private void updatePost(Integer postId) {
+        String newTitle = inputPostTitle();
+        String newContent = inputPostContent();
+        List<LabelDto> labels = setLabels();
+        postController.updatePost(postId, newTitle, newContent, labels);
+        System.out.println("Post has been updated.");
+        showPost(postId);
+    }
+
+    private String inputPostTitle() {
+        System.out.println("Write post's title and press \"Enter\":");
+        return inputManager.inputText();
+    }
+
+    private String inputPostContent() {
+        System.out.println("Write post and press \"Enter\":");
+        return inputManager.inputText();
+    }
+
+    private List<LabelDto> setLabels() {
+        System.out.println("Please set labels.");
+        return labelView.selectLabels();
     }
 }
