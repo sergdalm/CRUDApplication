@@ -22,7 +22,7 @@ public class PostgresPostRepository implements PostRepository {
             "SELECT * FROM post WHERE id = ?";
 
     private static final String FIND_ALL =
-            "SELECT * FROM post";
+            "SELECT * FROM post ORDER BY title";
 
     private static final String SAVE_POST =
             "INSERT INTO post(title, content, created, updated) " +

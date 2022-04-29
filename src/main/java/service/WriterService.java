@@ -10,6 +10,8 @@ import repository.postgres.PostgresWriterRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.*;
+
 public class WriterService {
     private static final WriterService INSTANCE = new WriterService();
     private final WriterRepository writerRepository = PostgresWriterRepository.getInstance();
@@ -32,7 +34,7 @@ public class WriterService {
                         .firstName(writer.getFirstName())
                         .lastName(writer.getLastName())
                         .build())
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     public LoginWriterDto loginWriter(String email, String password) throws LoginErrorException {
