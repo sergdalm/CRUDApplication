@@ -6,10 +6,7 @@ import model.Writer;
 import repository.WriterRepository;
 import until.ConnectionManager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,12 +15,50 @@ public class PostgresWriterRepository implements WriterRepository {
 
     private static final WriterRepository INSTANCE = new PostgresWriterRepository();
 
-    private PostgresWriterRepository() {
-    }
+    private final static String CREATE_DATABASE =
+            "CREATE DATABASE post_repository ;";
 
+    private final static String CREATE_TABLE_WRITER =
+            "CREATE TABLE writer\n" +
+                    "(\n" +
+                    "    id         SERIAL PRIMARY KEY,\n" +
+                    "    first_name VARCHAR(128) NOT NULL,\n" +
+                    "    last_name  VARCHAR(128) NOT NULL,\n" +
+                    "    email      VARCHAR(128) NOT NULL UNIQUE,\n" +
+                    "    password   VARCHAR(128) NOT NULL\n" +
+                    "\n" +
+                    ");";
+    private final static String CREATE_TABLE_POST =
+            "CREATE TABLE post\n" +
+                    "(\n" +
+                    "    id      SERIAL PRIMARY KEY,\n" +
+                    "    title   VARCHAR(220) NOT NULL,\n" +
+                    "    content TEXT         NOT NULL,\n" +
+                    "    created TIMESTAMP    NOT NULL,\n" +
+                    "    updated TIMESTAMP\n" +
+                    ");";
+    private final static String CREATE_TABLE_WRITER_POST =
+            "CREATE TABLE writer_post\n" +
+                    "(\n" +
+                    "    writer_id INT REFERENCES writer (id) ON DELETE CASCADE ,\n" +
+                    "    post_id   INT REFERENCES post (id)  ON DELETE CASCADE UNIQUE\n" +
+                    ");";
+    private final static String CREATE_TABLE_LABEL =
+            "CREATE TABLE label\n" +
+                    "(\n" +
+                    "    id   SERIAL PRIMARY KEY,\n" +
+                    "    name VARCHAR(128) UNIQUE NOT NULL\n" +
+                    ");";
+    private final static String CREATE_TABLE_LABEL_POST =
+            "CREATE TABLE label_post\n" +
+                    "(\n" +
+                    "    label_id INT REFERENCES label (id) ON DELETE CASCADE,\n" +
+                    "    post_id  INT REFERENCES post (id) ON DELETE CASCADE\n" +
+                    ");";
     private final static String FIND_ALL =
             "SELECT * " +
             "FROM writer";
+
     private final static String FIND_BY_ID =
             "SELECT * FROM writer WHERE id = ?";
 
@@ -35,6 +70,13 @@ public class PostgresWriterRepository implements WriterRepository {
     private final static String DELETE = "";
 
     private final static String SAVE = "";
+
+    private PostgresWriterRepository() {
+    }
+
+    static {
+        createDatabase();
+    }
 
     @Override
     public Writer getById(Integer id) {
@@ -91,6 +133,18 @@ public class PostgresWriterRepository implements WriterRepository {
         }
     }
 
+    @Override
+    public boolean deleteById(Integer id) {
+        return false;
+    }
+
+
+
+    @Override
+    public Writer getWriterByName(String firstName, String lastName) {
+        return null;
+    }
+
     private Writer buildWriter(ResultSet resultSet) throws SQLException {
         return new Writer(
                 resultSet.getObject("id", Integer.class),
@@ -102,16 +156,19 @@ public class PostgresWriterRepository implements WriterRepository {
         );
     }
 
-    @Override
-    public boolean deleteById(Integer id) {
-        return false;
-    }
+    private static void createDatabase() {
+        try (var connection = ConnectionManager.get();
+             var statement = connection.createStatement()) {
+            statement.executeUpdate(CREATE_DATABASE);
+            statement.executeUpdate(CREATE_TABLE_WRITER);
+            statement.executeUpdate(CREATE_TABLE_POST);
+            statement.executeUpdate(CREATE_TABLE_LABEL);
+            statement.executeUpdate(CREATE_TABLE_WRITER_POST);
+            statement.executeUpdate(CREATE_TABLE_LABEL_POST);
 
-
-
-    @Override
-    public Writer getWriterByName(String firstName, String lastName) {
-        return null;
+        } catch (SQLException e) {
+            // Database has been created
+        }
     }
 
     public static WriterRepository getInstance() {
