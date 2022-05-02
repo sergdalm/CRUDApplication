@@ -24,7 +24,8 @@ public class PostgresWriterRepository implements WriterRepository {
     private final static String FIND_ALL =
             "SELECT * " +
             "FROM writer";
-    private final static String FIND_BY_ID = "";
+    private final static String FIND_BY_ID =
+            "SELECT * FROM writer WHERE id = ?";
 
     private final static String FIND_BY_EMAIL =
             "SELECT * FROM writer WHERE email = ?";
@@ -37,7 +38,15 @@ public class PostgresWriterRepository implements WriterRepository {
 
     @Override
     public Writer getById(Integer id) {
-        return null;
+        try (var connection = ConnectionManager.get();
+             var prepareStatement = connection.prepareStatement(FIND_BY_ID)) {
+            prepareStatement.setInt(1, id);
+            var resultSet = prepareStatement.executeQuery();
+            resultSet.next();
+            return buildWriter(resultSet);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

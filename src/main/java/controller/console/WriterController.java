@@ -38,7 +38,7 @@ public class WriterController {
 
     public String getWriterFullName(Integer id) {
         var writer = writerService.getWriterById(id);
-        return writer.getFirstName() + " " + writer.getLastName();
+        return writer.getFullName();
     }
 
     public List<WriterDto> getAllWriters() {
@@ -46,7 +46,7 @@ public class WriterController {
     }
 
     public void update(Integer id, String firstName, String lastName) {
-        writerService.update(WriterDto.builder()
+        writerService.update(LoginWriterDto.builder()
                 .id(id)
                 .firstName(firstName)
                 .lastName(lastName)

@@ -28,7 +28,7 @@ public class WriterView {
             List<WriterDto> writers = writerController.getAllWriters();
             int count = 1;
             for (WriterDto writer : writers) {
-                System.out.println(count++ + ". " + writer.getFirstName() + " " + writer.getLastName());
+                System.out.println(count++ + ". " + writer.getFullName());
             }
             System.out.println("Enter writer's id to see writer's post (0 for back):");
             input = inputManager.getNumberFromUserBetweenMinAndMax(0, writers.size());
@@ -105,8 +105,7 @@ public class WriterView {
 
 
     public void showWriterName(Integer id){
-        System.out.println(writerController.getWriterById(id).getFirstName()
-                + writerController.getWriterById(id).getLastName());
+        System.out.println(writerController.getWriterById(id).getFullName());
     }
 
     public void addWriterPost(Integer writerId, PostDto post) {

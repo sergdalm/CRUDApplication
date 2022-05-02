@@ -20,7 +20,9 @@ public class WriterService {
     }
 
     public WriterDto getWriterById(Integer id) {
-        return null;
+        var writer = writerRepository.getById(id);
+        return buildWriterDto(writer);
+
     }
 
     public LoginWriterDto createWriter(LoginWriterDto createWriterDto) {
@@ -29,11 +31,7 @@ public class WriterService {
 
     public List<WriterDto> getAllWriters() {
         return writerRepository.getAll().stream()
-                .map(writer -> WriterDto.builder()
-                        .id(writer.getId())
-                        .firstName(writer.getFirstName())
-                        .lastName(writer.getLastName())
-                        .build())
+                .map(this::buildWriterDto)
                 .collect(toList());
     }
 
@@ -63,11 +61,17 @@ public class WriterService {
         return INSTANCE;
     }
 
-    public void update(WriterDto writerDto) {
+    public void update(LoginWriterDto writerDto) {
         writerRepository.update(new Writer(writerDto.getId(),
                 writerDto.getFirstName(), writerDto.getLastName(), null, null, null));
     }
 
+    private WriterDto buildWriterDto(Writer writer) {
+        return WriterDto.builder()
+                .id(writer.getId())
+                .fullName(writer.getFirstName() + " " + writer.getLastName())
+                .build();
+    }
     public void delete(Integer id) {
         writerRepository.deleteById(id);
     }

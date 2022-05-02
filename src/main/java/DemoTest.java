@@ -10,6 +10,6 @@ public class DemoTest {
 //        totalView.start();
 
         var writerService = WriterService.getInstance();
-        writerService.getAllWriters().forEach( w -> System.out.println(w.getFirstName() + " " + w.getLastName()));
+        writerService.getAllWriters().forEach( w -> System.out.println(w.getFullName()));
     }
 }
