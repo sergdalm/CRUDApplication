@@ -53,7 +53,7 @@ public class PostgresWriterRepository implements WriterRepository {
             "CREATE TABLE label_post\n" +
                     "(\n" +
                     "    label_id INT REFERENCES label (id) ON DELETE CASCADE,\n" +
-                    "    post_id  INT REFERENCES post (id) ON DELETE CASCADE\n" +
+                    "    post_id  INT REFERENCES post (id) NOT NULL ON DELETE CASCADE\n" +
                     ");";
     private final static String FIND_ALL =
             "SELECT * " +
