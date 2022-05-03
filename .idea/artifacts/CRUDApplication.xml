@@ -2,7 +2,7 @@
   <artifact type="war" name="CRUDApplication">
     <output-path>$PROJECT_DIR$/out/artifacts/CRUDApplication</output-path>
     <root id="archive" name="CRUDApplication.war">
-      <element id="artifact" artifact-name="CRUDApplication(2):Web exploded" />
+      <element id="artifact" artifact-name="CRUDApplication:Web exploded" />
     </root>
   </artifact>
 </component>
