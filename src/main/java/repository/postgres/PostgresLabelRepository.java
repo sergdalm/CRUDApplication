@@ -30,7 +30,10 @@ public class PostgresLabelRepository implements LabelRepository {
     private static final String MATCH_LABEL_WITH_POST =
             "INSERT INTO label_post(label_id, post_id) VALUES(?, ?) ON CONFLICT DO NOTHING";
     private static final String FIND_BY_POST_ID =
-            "SELECT * FROM label WHERE id = (SELECT label_id FROM label_post WHERE post_id = ?)";
+            "SELECT *\n" +
+                    "FROM label\n" +
+                    "JOIN label_post lp on label.id = lp.label_id\n" +
+                    "WHERE post_id = ?;";
 
     @Override
     public Label getById(Integer id) {
@@ -127,7 +130,6 @@ public class PostgresLabelRepository implements LabelRepository {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     private Label buildLabel(ResultSet resultSet) throws SQLException {
