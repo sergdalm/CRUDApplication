@@ -46,10 +46,10 @@ public class WriterView {
         System.out.println("Enter your last name: ");
         String lastName = inputManager.inputWithoutSpaces();
 
-        System.out.println("Enter your email last name: ");
+        System.out.println("Enter your email: ");
         String email = inputManager.inputWithoutSpaces();
 
-        System.out.println("Enter your password last name: ");
+        System.out.println("Enter your password: ");
         String password = inputManager.inputWithoutSpaces();
 
         writerController.saveWriter(firstName, lastName, email, password);
@@ -57,7 +57,7 @@ public class WriterView {
 
         System.out.println("Writer created: " + firstName + " " + lastName);
 
-        return null;
+        return writerController.saveWriter(firstName, lastName, email, password);
     }
 
 

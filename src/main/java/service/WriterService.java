@@ -26,7 +26,16 @@ public class WriterService {
     }
 
     public LoginWriterDto createWriter(LoginWriterDto createWriterDto) {
-        return createWriterDto;
+        Writer writer = writerRepository.save(
+                new Writer(null, createWriterDto.getFirstName(), createWriterDto.getLastName(),
+                        createWriterDto.getEmail(), createWriterDto.getPassword(), null));
+        return LoginWriterDto.builder().
+                id(writer.getId())
+                .firstName(writer.getFirstName())
+                .lastName(writer.getLastName())
+                .email(writer.getEmail())
+                .password(writer.getPassword())
+                .build();
     }
 
     public List<WriterDto> getAllWriters() {

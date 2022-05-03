@@ -16,7 +16,7 @@ public class PostgresWriterRepository implements WriterRepository {
     private static final WriterRepository INSTANCE = new PostgresWriterRepository();
 
     private final static String CREATE_DATABASE =
-            "CREATE DATABASE post_repository ;";
+            "CREATE DATABASE post_repository;";
 
     private final static String CREATE_TABLE_WRITER =
             "CREATE TABLE writer\n" +
@@ -69,7 +69,8 @@ public class PostgresWriterRepository implements WriterRepository {
 
     private final static String DELETE = "";
 
-    private final static String SAVE = "";
+    private final static String SAVE =
+            "INSERT INTO writer(first_name, last_name, email, password) VALUES (?, ?, ?, ?)";
 
     private PostgresWriterRepository() {
     }
@@ -92,8 +93,21 @@ public class PostgresWriterRepository implements WriterRepository {
     }
 
     @Override
-    public Writer save(Writer obj) {
-        return null;
+    public Writer save(Writer writer) {
+        createDatabase();
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(SAVE, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            preparedStatement.setString(1, writer.getFirstName());
+            preparedStatement.setString(2, writer.getLastName());
+            preparedStatement.setString(3, writer.getEmail());
+            preparedStatement.setString(4, writer.getPassword());
+            preparedStatement.executeUpdate();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            resultSet.next();
+            return buildWriter(resultSet);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -159,7 +173,6 @@ public class PostgresWriterRepository implements WriterRepository {
     private static void createDatabase() {
         try (var connection = ConnectionManager.get();
              var statement = connection.createStatement()) {
-            statement.executeUpdate(CREATE_DATABASE);
             statement.executeUpdate(CREATE_TABLE_WRITER);
             statement.executeUpdate(CREATE_TABLE_POST);
             statement.executeUpdate(CREATE_TABLE_LABEL);
