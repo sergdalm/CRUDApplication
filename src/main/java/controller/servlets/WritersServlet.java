@@ -20,6 +20,5 @@ public class WritersServlet extends HttpServlet {
 
         req.getRequestDispatcher(JspHelper.getPath("writers"))
                 .forward(req, resp);
-        System.out.println("hi!!!");
     }
 }
