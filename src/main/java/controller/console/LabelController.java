@@ -1,6 +1,7 @@
 package controller.console;
 
 import dto.LabelDto;
+import repository.postgres.PostgresLabelRepository;
 import service.LabelService;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 import static java.util.stream.Collectors.*;
 
 public class LabelController {
-    private final LabelService labelService = LabelService.getInstance();
+    private final LabelService labelService = new LabelService(PostgresLabelRepository.getInstance());
 
     public LabelDto saveLabel(String name) {
         return labelService.createLabel(LabelDto.builder()

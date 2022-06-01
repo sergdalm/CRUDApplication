@@ -10,22 +10,19 @@ import java.util.List;
 import static java.util.stream.Collectors.*;
 
 public class LabelService {
-    private static final LabelService INSTANCE = new LabelService();
-    private final LabelRepository labelRepository =  PostgresLabelRepository.getInstance();
+    private final LabelRepository labelRepository;
 
-    private LabelService() {
+    public LabelService(LabelRepository labelRepository) {
+        this.labelRepository = labelRepository;
     }
 
     public LabelDto createLabel(LabelDto labelDto) {
-        var label = labelRepository.save(new Label(0, labelDto.getName()));
-        return LabelDto.builder()
-                .id(label.getId())
-                .name(label.getName())
-                .build();
+        var label = labelRepository.save(labelDto.toEntity());
+        return LabelDto.fromEntity(label);
     }
 
     public LabelDto updateLabel(LabelDto labelDto) {
-        labelRepository.update(new Label(labelDto.getId(),labelDto.getName()));
+        labelRepository.update(labelDto.toEntity());
         return labelDto;
     }
 
@@ -35,24 +32,13 @@ public class LabelService {
 
     public List<LabelDto> getAll() {
         return labelRepository.getAll().stream()
-                .map(label -> LabelDto.builder()
-                        .id(label.getId())
-                        .name(label.getName())
-                        .build())
+                .map(LabelDto::fromEntity)
                 .collect(toList());
     }
 
     public LabelDto getById(Integer id) {
         var label = labelRepository.getById(id);
-        return LabelDto.builder()
-                .id(label.getId())
-                .name(label.getName())
-                .build();
-    }
-
-
-    public static LabelService getInstance() {
-        return INSTANCE;
+        return LabelDto.fromEntity(label);
     }
 
     public List<Label> getLabelsByPostId(Integer postId) {
