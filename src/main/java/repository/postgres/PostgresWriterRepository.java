@@ -1,7 +1,6 @@
 package repository.postgres;
 
 import exceptions.LoginErrorException;
-import liquibase.pro.packaged.S;
 import model.Writer;
 import repository.WriterRepository;
 import until.ConnectionManager;
@@ -57,7 +56,7 @@ public class PostgresWriterRepository implements WriterRepository {
                     ");";
     private final static String FIND_ALL =
             "SELECT * " +
-            "FROM writer";
+                    "FROM writer";
 
     private final static String FIND_BY_ID =
             "SELECT * FROM writer WHERE id = ?";
@@ -81,22 +80,24 @@ public class PostgresWriterRepository implements WriterRepository {
 
     @Override
     public Writer getById(Integer id) {
-        try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(FIND_BY_ID)) {
-            prepareStatement.setInt(1, id);
-            var resultSet = prepareStatement.executeQuery();
+        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(FIND_BY_ID);
+        try {
+            preparedStatement.setInt(1, id);
+            var resultSet = preparedStatement.executeQuery();
             resultSet.next();
             return buildWriter(resultSet);
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
     @Override
     public Writer save(Writer writer) {
         createDatabase();
-        try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(SAVE, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatementWithGeneratedKeys(SAVE);
+        try {
             preparedStatement.setString(1, writer.getFirstName());
             preparedStatement.setString(2, writer.getLastName());
             preparedStatement.setString(3, writer.getEmail());
@@ -107,6 +108,8 @@ public class PostgresWriterRepository implements WriterRepository {
             return buildWriter(resultSet);
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
@@ -117,33 +120,36 @@ public class PostgresWriterRepository implements WriterRepository {
 
     @Override
     public List<Writer> getAll() {
-        try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(FIND_ALL)) {
-            var resultSet = prepareStatement.executeQuery();
+        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(FIND_ALL);
+        try {
+            var resultSet = preparedStatement.executeQuery();
             List<Writer> writers = new ArrayList<>();
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 writers.add(buildWriter(resultSet));
             }
             return writers;
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
     @Override
     public Optional<Writer> getWriterByEmail(String email) {
-        try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(FIND_BY_EMAIL)) {
-            prepareStatement.setString(1, email);
-            var resultSet = prepareStatement.executeQuery();
-            if(resultSet.next()){
+        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(FIND_BY_EMAIL);
+        try {
+            preparedStatement.setString(1, email);
+            var resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
                 return Optional.of(buildWriter(resultSet));
-            }
-            else {
+            } else {
                 return Optional.empty();
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
@@ -151,7 +157,6 @@ public class PostgresWriterRepository implements WriterRepository {
     public boolean deleteById(Integer id) {
         return false;
     }
-
 
 
     @Override
@@ -171,8 +176,8 @@ public class PostgresWriterRepository implements WriterRepository {
     }
 
     private static void createDatabase() {
-        try (var connection = ConnectionManager.get();
-             var statement = connection.createStatement()) {
+        Statement statement = ConnectionManager.getStatement();
+        try {
             statement.executeUpdate(CREATE_TABLE_WRITER);
             statement.executeUpdate(CREATE_TABLE_POST);
             statement.executeUpdate(CREATE_TABLE_LABEL);
@@ -181,6 +186,8 @@ public class PostgresWriterRepository implements WriterRepository {
 
         } catch (SQLException e) {
             // Database has been created
+        } finally {
+            ConnectionManager.closeConnection(statement);
         }
     }
 

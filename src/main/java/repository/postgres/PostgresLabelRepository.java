@@ -1,8 +1,5 @@
 package repository.postgres;
 
-import dto.LabelDto;
-import liquibase.pro.packaged.I;
-import liquibase.pro.packaged.L;
 import model.Label;
 import repository.LabelRepository;
 import until.ConnectionManager;
@@ -37,91 +34,58 @@ public class PostgresLabelRepository implements LabelRepository {
 
     @Override
     public Label getById(Integer id) {
-        try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(FIND_BY_ID)) {
-            prepareStatement.setInt(1, id);
-            var resultSet = prepareStatement.executeQuery();
+        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(FIND_BY_ID);
+        try {
+            preparedStatement.setInt(1, id);
+            var resultSet = preparedStatement.executeQuery();
             resultSet.next();
             return new Label(
                     resultSet.getObject("id", Integer.class),
                     resultSet.getObject("name", String.class));
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
     @Override
     public Label save(Label label) {
-        try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(SAVE, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            prepareStatement.setString(1,label.getName());
-            prepareStatement.executeUpdate();
-            var resultSet = prepareStatement.getGeneratedKeys();
+        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatementWithGeneratedKeys(SAVE);
+        try {
+            preparedStatement.setString(1, label.getName());
+            preparedStatement.executeUpdate();
+            var resultSet = preparedStatement.getGeneratedKeys();
             resultSet.next();
             label.setId(resultSet.getObject("id", Integer.class));
             return label;
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
     @Override
     public Label update(Label label) {
-        try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(UPDATE)) {
-            prepareStatement.setString(1, label.getName());
-            prepareStatement.setInt(2, label.getId());
-            prepareStatement.executeUpdate();
+        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(UPDATE);
+        try {
+            preparedStatement.setString(1, label.getName());
+            preparedStatement.setInt(2, label.getId());
+            preparedStatement.executeUpdate();
             return label;
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
     @Override
     public List<Label> getAll() {
-        try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(FIND_ALL)) {
-            var resultSet = prepareStatement.executeQuery();
-            List<Label> labels = new ArrayList<>();
-            while(resultSet.next())
-                labels.add(buildLabel(resultSet));
-            return labels;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public boolean deleteById(Integer id) {
-        try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(DELETE_BY_ID)) {
-            prepareStatement.setInt(1, id);
-            prepareStatement.executeUpdate();
-            return true;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void matchLabelWithPost(Label label, Integer postId) {
-        try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(MATCH_LABEL_WITH_POST)) {
-            prepareStatement.setInt(1, label.getId());
-            prepareStatement.setInt(2, postId);
-            prepareStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public List<Label> getLabelsByPostId(Integer postId) {
-        try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(FIND_BY_POST_ID)) {
-            prepareStatement.setInt(1, postId);
-            var resultSet = prepareStatement.executeQuery();
+        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(FIND_ALL);
+        try {
+            var resultSet = preparedStatement.executeQuery();
             List<Label> labels = new ArrayList<>();
             while (resultSet.next()) {
                 labels.add(buildLabel(resultSet));
@@ -129,6 +93,54 @@ public class PostgresLabelRepository implements LabelRepository {
             return labels;
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            ConnectionManager.closeConnection(preparedStatement);
+        }
+    }
+
+    @Override
+    public boolean deleteById(Integer id) {
+        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(DELETE_BY_ID);
+        try {
+            preparedStatement.setInt(1, id);
+            preparedStatement.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ConnectionManager.closeConnection(preparedStatement);
+        }
+    }
+
+    @Override
+    public void matchLabelWithPost(Label label, Integer postId) {
+        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(MATCH_LABEL_WITH_POST);
+        try {
+            preparedStatement.setInt(1, label.getId());
+            preparedStatement.setInt(2, postId);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ConnectionManager.closeConnection(preparedStatement);
+        }
+    }
+
+    @Override
+    public List<Label> getLabelsByPostId(Integer postId) {
+        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(FIND_BY_POST_ID);
+        try {
+            preparedStatement.setInt(1, postId);
+            var resultSet = preparedStatement.executeQuery();
+            List<Label> labels = new ArrayList<>();
+            while (resultSet.next()) {
+                labels.add(buildLabel(resultSet));
+            }
+            return labels;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
@@ -137,6 +149,7 @@ public class PostgresLabelRepository implements LabelRepository {
                 resultSet.getObject("id", Integer.class),
                 resultSet.getObject("name", String.class));
     }
+
     public static LabelRepository getInstance() {
         return INSTANCE;
     }
