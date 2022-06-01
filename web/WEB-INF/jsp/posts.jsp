@@ -15,7 +15,7 @@
 <body>
     <h1>Posts of ${requestScope.writerName}</h1>
     <c:forEach var="post" items="${requestScope.posts}">
-        <li>${post.title}</li>
+        <li><a href="${pageContext.request.contextPath}/post?postId=${post.id}&writerId=${writer.id}">${post.title}</a></li>
     </c:forEach>
 
 </body>

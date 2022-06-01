@@ -4,7 +4,6 @@ import controller.console.LabelController;
 import controller.console.PostController;
 import dto.LabelDto;
 import dto.PostDto;
-import liquibase.pro.packaged.L;
 import model.Label;
 import model.Post;
 
