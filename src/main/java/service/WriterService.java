@@ -3,9 +3,12 @@ package service;
 import dto.LoginWriterDto;
 import dto.WriterDto;
 import exceptions.LoginErrorException;
+import exceptions.ValidException;
 import model.Writer;
 import repository.WriterRepository;
 import repository.postgres.PostgresWriterRepository;
+import validator.CreateWriterValidator;
+import validator.ValidationResult;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,32 +18,30 @@ import static java.util.stream.Collectors.*;
 public class WriterService {
     private static final WriterService INSTANCE = new WriterService();
     private final WriterRepository writerRepository = PostgresWriterRepository.getInstance();
+    private final CreateWriterValidator createWriterValidator = CreateWriterValidator.getInstance();
 
     private WriterService() {
     }
 
     public WriterDto getWriterById(Integer id) {
         var writer = writerRepository.getById(id);
-        return buildWriterDto(writer);
+        return WriterDto.fromEntity(writer);
 
     }
 
-    public LoginWriterDto createWriter(LoginWriterDto createWriterDto) {
-        Writer writer = writerRepository.save(
-                new Writer(null, createWriterDto.getFirstName(), createWriterDto.getLastName(),
-                        createWriterDto.getEmail(), createWriterDto.getPassword(), null));
-        return LoginWriterDto.builder().
-                id(writer.getId())
-                .firstName(writer.getFirstName())
-                .lastName(writer.getLastName())
-                .email(writer.getEmail())
-                .password(writer.getPassword())
-                .build();
+    public LoginWriterDto createWriter(LoginWriterDto loginWriterDto) {
+        ValidationResult validationResult = createWriterValidator.isValid(loginWriterDto);
+        if(!validationResult.isValid()) {
+            throw new ValidException(validationResult.getErrors());
+        }
+
+        Writer writer = writerRepository.save(loginWriterDto.toEntity());
+        return LoginWriterDto.fromEntity(writer);
     }
 
     public List<WriterDto> getAllWriters() {
         return writerRepository.getAll().stream()
-                .map(this::buildWriterDto)
+                .map(WriterDto::fromEntity)
                 .collect(toList());
     }
 
@@ -52,13 +53,7 @@ public class WriterService {
         else {
             var writer = maybeWriter.get();
             if(writer.getPassword().equals(password)) {
-                return LoginWriterDto.builder()
-                        .id(writer.getId())
-                        .firstName(writer.getFirstName())
-                        .lastName(writer.getLastName())
-                        .email(writer.getEmail())
-                        .password(writer.getPassword())
-                        .build();
+                return LoginWriterDto.fromEntity(writer);
             }
             else {
                 throw new LoginErrorException("Password is invalid");
@@ -70,18 +65,19 @@ public class WriterService {
         return INSTANCE;
     }
 
-    public void update(LoginWriterDto writerDto) {
-        writerRepository.update(new Writer(writerDto.getId(),
-                writerDto.getFirstName(), writerDto.getLastName(), null, null, null));
+    public void update(LoginWriterDto loginWriterDto) {
+        writerRepository.update(loginWriterDto.toEntity());
     }
 
-    private WriterDto buildWriterDto(Writer writer) {
-        return WriterDto.builder()
-                .id(writer.getId())
-                .fullName(writer.getFirstName() + " " + writer.getLastName())
-                .build();
-    }
     public void delete(Integer id) {
         writerRepository.deleteById(id);
+    }
+
+    public boolean checkPassword(String firstPassword, String secondPassword) {
+        ValidationResult validationResult = createWriterValidator.checkPassword(firstPassword, secondPassword);
+        if (!validationResult.isValid()) {
+            throw new ValidException(validationResult.getErrors());
+        }
+        return true;
     }
 }
