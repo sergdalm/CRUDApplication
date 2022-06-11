@@ -1,11 +1,15 @@
 package dto;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import model.Label;
 
+import java.util.Objects;
+
 @Value
 @Builder
+@EqualsAndHashCode
 public class LabelDto {
     Integer id;
     String name;
