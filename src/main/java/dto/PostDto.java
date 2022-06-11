@@ -1,6 +1,7 @@
 package dto;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import model.Label;
 import model.Post;
@@ -12,6 +13,7 @@ import static java.util.stream.Collectors.toList;
 
 @Value
 @Builder
+@EqualsAndHashCode
 public class PostDto {
     Integer id;
     String title;

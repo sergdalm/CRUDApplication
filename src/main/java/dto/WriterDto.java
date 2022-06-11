@@ -1,11 +1,13 @@
 package dto;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import model.Writer;
 
 @Value
 @Builder
+@EqualsAndHashCode
 public class WriterDto {
     Integer id;
     String fullName;
