@@ -18,5 +18,6 @@ public class Post {
     private String content;
     private LocalDateTime created;
     private LocalDateTime updated;
+    @EqualsAndHashCode.Exclude
     private List<Label> labels;
 }

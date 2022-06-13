@@ -16,5 +16,6 @@ public class Writer {
     private String lastName;
     private String email;
     private String password;
+    @EqualsAndHashCode.Exclude
     private List<Post> posts;
 }
