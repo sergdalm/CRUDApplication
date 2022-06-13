@@ -20,6 +20,7 @@ public class PostDto {
     String content;
     LocalDateTime created;
     LocalDateTime updated;
+    @EqualsAndHashCode.Exclude
     List<LabelDto> labels;
 
     public static PostDto fromEntity(Post post) {
