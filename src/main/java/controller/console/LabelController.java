@@ -6,7 +6,7 @@ import service.LabelService;
 
 import java.util.List;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
 
 public class LabelController {
     private final LabelService labelService = new LabelService(PostgresLabelRepository.getInstance());
@@ -22,7 +22,7 @@ public class LabelController {
     }
 
     public List<LabelDto> getAll() {
-        return  labelService.getAll();
+        return labelService.getAll();
     }
 
     public String getAllLabelsSeparatedByComma() {
@@ -37,20 +37,15 @@ public class LabelController {
     }
 
     public void update(Integer id, String newName) {
-       labelService.updateLabel(LabelDto.builder()
-               .id(id)
-               .name(newName)
-               .build());
+        labelService.updateLabel(LabelDto.builder()
+                .id(id)
+                .name(newName)
+                .build());
 
     }
 
     public List<LabelDto> getLabelsForPost(Integer postId) {
-        return labelService.getLabelsByPostId(postId).stream()
-                .map(label -> LabelDto.builder()
-                        .id(label.getId())
-                        .name(label.getName())
-                        .build())
-                .collect(toList());
+        return labelService.getLabelsByPostId(postId);
     }
 
     public LabelDto getLabelById(Integer id) {

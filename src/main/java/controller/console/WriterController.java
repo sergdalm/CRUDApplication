@@ -3,19 +3,14 @@ package controller.console;
 import dto.LoginWriterDto;
 import dto.WriterDto;
 import exceptions.LoginErrorException;
-import model.Post;
-import model.Writer;
-import repository.WriterRepository;
-import repository.gson.JsonWriterRepositoryImpl;
+import repository.postgres.PostgresWriterRepository;
 import service.WriterService;
-import view.PostView;
 
 import java.util.List;
 
 
 public class WriterController {
-    WriterService writerService = WriterService.getInstance();
-
+    WriterService writerService = new WriterService(PostgresWriterRepository.getInstance());
 
     public LoginWriterDto saveWriter(String firstName, String lastName, String email, String password) {
         LoginWriterDto writer = LoginWriterDto.builder()
@@ -25,7 +20,7 @@ public class WriterController {
                 .password(password)
                 .build();
 
-        return  writerService.createWriter(writer);
+        return writerService.createWriter(writer);
     }
 
     public WriterDto getWriterById(Integer id) {
