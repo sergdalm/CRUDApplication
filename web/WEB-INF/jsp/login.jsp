@@ -12,7 +12,7 @@
 </head>
 <body>
     <h1>Login</h1>
-    <form action="/login" method="post">
+    <form action="${pageContext.request.contextPath}/login" method="post" enctype="multipart/form-data">
         <label for="email">Email:
             <input type="email" name="email" id="email">
         </label><br>
@@ -21,5 +21,7 @@
         </label><br>
         <button type="submit">Login</button>
     </form>
+    <br>
+    <div><a href="${pageContext.request.contextPath}/registration">Registration</a></div>
 </body>
 </html>
