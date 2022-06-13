@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import repository.postgres.PostgresWriterRepository;
 import service.WriterService;
 import until.JspHelper;
 
@@ -12,7 +13,7 @@ import java.io.IOException;
 
 @WebServlet("/writers")
 public class WritersServlet extends HttpServlet {
-    private final WriterService writerService = WriterService.getInstance();
+    private final WriterService writerService = new WriterService(PostgresWriterRepository.getInstance());
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
