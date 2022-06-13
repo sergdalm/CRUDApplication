@@ -1,23 +1,17 @@
 package service;
 
-import dto.LabelDto;
 import dto.PostDto;
-import model.Label;
-import model.Post;
 import repository.PostRepository;
-import repository.postgres.PostgresLabelRepository;
-import repository.postgres.PostgresPostRepository;
 
 import java.util.List;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 public class PostService {
-    private final static PostService INSTANCE = new PostService();
-    private final static PostRepository postRepository = PostgresPostRepository.getInstance();
-    private final static LabelService labelService = new LabelService(PostgresLabelRepository.getInstance());
+    private final PostRepository postRepository;
 
-    private PostService() {
+    public PostService(PostRepository postRepository) {
+        this.postRepository = postRepository;
     }
 
     public List<PostDto> getAllPosts() {
@@ -36,7 +30,6 @@ public class PostService {
         var newPost = postRepository.save(postDto.toEntity());
 
         postRepository.matchPostWithWriter(newPost.getId(), writerId);
-        postRepository.matchPostWithLabels(postDto.getId(), newPost.getLabels());
         return PostDto.fromEntity(newPost);
     }
 
@@ -51,15 +44,7 @@ public class PostService {
     }
 
     public PostDto update(PostDto postDto) {
-        var post = postRepository.update(new Post(postDto.getId(), postDto.getTitle(), postDto.getContent(), null, null,
-                postDto.getLabels().stream()
-                        .map(labelDto -> new Label(labelDto.getId(), labelDto.getName()))
-                        .collect(toList())));
+        var post = postRepository.update(postDto.toEntity());
         return PostDto.fromEntity(post);
-    }
-
-
-    public static PostService getInstance() {
-        return INSTANCE;
     }
 }

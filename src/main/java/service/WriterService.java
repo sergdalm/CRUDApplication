@@ -6,21 +6,19 @@ import exceptions.LoginErrorException;
 import exceptions.ValidException;
 import model.Writer;
 import repository.WriterRepository;
-import repository.postgres.PostgresWriterRepository;
 import validator.CreateWriterValidator;
 import validator.ValidationResult;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 public class WriterService {
-    private static final WriterService INSTANCE = new WriterService();
-    private final WriterRepository writerRepository = PostgresWriterRepository.getInstance();
+    private final WriterRepository writerRepository;
     private final CreateWriterValidator createWriterValidator = CreateWriterValidator.getInstance();
 
-    private WriterService() {
+    public WriterService(WriterRepository writerRepository) {
+        this.writerRepository = writerRepository;
     }
 
     public WriterDto getWriterById(Integer id) {
@@ -31,7 +29,7 @@ public class WriterService {
 
     public LoginWriterDto createWriter(LoginWriterDto loginWriterDto) {
         ValidationResult validationResult = createWriterValidator.isValid(loginWriterDto);
-        if(!validationResult.isValid()) {
+        if (!validationResult.isValid()) {
             throw new ValidException(validationResult.getErrors());
         }
 
@@ -47,22 +45,16 @@ public class WriterService {
 
     public LoginWriterDto loginWriter(String email, String password) throws LoginErrorException {
         var maybeWriter = writerRepository.getWriterByEmail(email);
-        if(maybeWriter.isEmpty()) {
+        if (maybeWriter.isEmpty()) {
             throw new LoginErrorException("Email does not exist");
-        }
-        else {
+        } else {
             var writer = maybeWriter.get();
-            if(writer.getPassword().equals(password)) {
+            if (writer.getPassword().equals(password)) {
                 return LoginWriterDto.fromEntity(writer);
-            }
-            else {
+            } else {
                 throw new LoginErrorException("Password is invalid");
             }
         }
-    }
-
-    public static WriterService getInstance() {
-        return INSTANCE;
     }
 
     public void update(LoginWriterDto loginWriterDto) {
