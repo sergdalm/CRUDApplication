@@ -28,73 +28,97 @@ public class PostServiceTest {
     private PostRepository mockPostRepository;
     @InjectMocks
     private PostService testPostService;
-    private static final List<Post> POST_ENTITIES = List.of(
-            new Post(1, "Post1", "Content of this post", LocalDateTime.now(), null, null),
-            new Post(2, "Post2", "Content of this post", LocalDateTime.now(), null, null),
-            new Post(3, "Post3", "Content of this post", LocalDateTime.now(), null, null),
-            new Post(4, "Post4", "Content of this post", LocalDateTime.now(), null, null)
-    );
+
+    private List<Post> getPostEntityList() {
+        return List.of(
+                new Post(1, "Post1", "Content of this post", LocalDateTime.now(), null, null),
+                new Post(2, "Post2", "Content of this post", LocalDateTime.now(), null, null),
+                new Post(3, "Post3", "Content of this post", LocalDateTime.now(), null, null),
+                new Post(4, "Post4", "Content of this post", LocalDateTime.now(), null, null));
+    }
+
+
+    private Post getPostEntity() {
+        return new Post(1, "Post title", "Post content", LocalDateTime.now(),
+                null, List.of(new Label(1, "post")));
+    }
+
+    private Post getUpdatedPostEntity() {
+        return new Post(
+                getPostDto().getId(),
+                getPostDto().getTitle(),
+                getPostDto().getContent(),
+                getPostDto().getCreated(),
+                LocalDateTime.now(),
+                List.of(new Label(1, "post")));
+    }
+
+    private PostDto getPostDto() {
+        return PostDto.builder()
+                .id(1)
+                .title("Post title")
+                .content("Post content")
+                .labels(Collections.emptyList())
+                .created(LocalDateTime.now())
+                .build();
+    }
+
+    private PostDto getNewPostDto() {
+        return PostDto.builder()
+                .title("Post title")
+                .content("Post content")
+                .labels(List.of(LabelDto.builder()
+                        .id(1)
+                        .name("post")
+                        .build()))
+                .build();
+    }
+
+    private int getPostId() {
+        return getPostDto().getId();
+    }
+
+    private int getWriterId() {
+        return 1;
+    }
 
     @Test
     public void shouldGetAllPosts() {
-        // given
+        List<Post> posts = getPostEntityList();
+        doReturn(posts).when(mockPostRepository).getAll();
 
-
-        doReturn(POST_ENTITIES).when(mockPostRepository).getAll();
-
-        // when
         List<PostDto> allPostsResult = testPostService.getAllPosts();
 
-        // then
-        for (int i = 0; i < POST_ENTITIES.size(); i++) {
-            assertEquals(PostDto.fromEntity(POST_ENTITIES.get(i)), allPostsResult.get(i));
+        for (int i = 0; i < posts.size(); i++) {
+            assertEquals(PostDto.fromEntity(posts.get(i)), allPostsResult.get(i));
         }
     }
 
     @Test
     public void shouldGetAllPostsByWriterId() {
-        // given
-        int writerId = 1;
-        doReturn(POST_ENTITIES).when(mockPostRepository).getPostsByWriterId(writerId);
+        List<Post> posts = getPostEntityList();
+        doReturn(posts).when(mockPostRepository).getPostsByWriterId(getWriterId());
 
-        // when
-        List<PostDto> allPostsByWriterIdResult = testPostService.getAllPostsByWriterId(writerId);
+        List<PostDto> allPostsByWriterIdResult = testPostService.getAllPostsByWriterId(getWriterId());
 
-        // then
         ArgumentCaptor<Integer> writerIdArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(mockPostRepository).getPostsByWriterId(writerIdArgumentCaptor.capture());
         Integer capturedWriterId = writerIdArgumentCaptor.getValue();
 
-        assertEquals(capturedWriterId, writerId);
-        for (int i = 0; i < POST_ENTITIES.size(); i++) {
-            assertEquals(PostDto.fromEntity(POST_ENTITIES.get(i)),
+        assertEquals(capturedWriterId, getWriterId());
+        for (int i = 0; i < posts.size(); i++) {
+            assertEquals(PostDto.fromEntity(posts.get(i)),
                     allPostsByWriterIdResult.get(i));
         }
     }
 
     @Test
     public void shouldSavePostAndReturnSavedPost() {
-        // when
-        PostDto newPostDto = PostDto.builder()
-                .title("Post title")
-                .content("Post content")
-                .labels(List.of(LabelDto.builder()
-                        .id(1)
-                        .name("post")
-                        .build()
-                ))
-                .build();
-        int writerId = 1;
+        Post postEntity = getPostEntity();
+        doReturn(postEntity).when(mockPostRepository).save(getNewPostDto().toEntity());
 
-        Post newPost = new Post(1, newPostDto.getTitle(), newPostDto.getContent(),
-                LocalDateTime.now(), null, List.of(new Label(1, "post")));
+        PostDto saveResult = testPostService.save(getNewPostDto(), getWriterId());
 
-        doReturn(newPost).when(mockPostRepository).save(newPostDto.toEntity());
-
-        // when
-        PostDto saveResult = testPostService.save(newPostDto, writerId);
-
-        // then
         ArgumentCaptor<Post> postArgumentCaptor = ArgumentCaptor.forClass(Post.class);
         verify(mockPostRepository).save(postArgumentCaptor.capture());
         Post capturedPost = postArgumentCaptor.getValue();
@@ -106,80 +130,55 @@ public class PostServiceTest {
                 matchPostWithWriterArgumentCaptor.capture());
         List<Integer> capturedPostIdAndWriterId = matchPostWithWriterArgumentCaptor.getAllValues();
 
-        assertEquals(newPostDto.toEntity(), capturedPost);
-        assertEquals(newPost.getId(), capturedPostIdAndWriterId.get(0));
-        assertEquals(writerId, capturedPostIdAndWriterId.get(1));
-        assertEquals(PostDto.fromEntity(newPost), saveResult);
+        assertEquals(getNewPostDto().toEntity(), capturedPost);
+        assertEquals(postEntity.getId(), capturedPostIdAndWriterId.get(0));
+        assertEquals(getWriterId(), capturedPostIdAndWriterId.get(1));
+        assertEquals(PostDto.fromEntity(postEntity), saveResult);
     }
 
     @Test
     public void shouldDeletePostAndReturnTrue() {
-        // given
-        int postId = 1;
-        doReturn(true).when(mockPostRepository).deleteById(postId);
+        doReturn(true).when(mockPostRepository).deleteById(getPostId());
 
-        // when
-        boolean deleteResult = testPostService.delete(postId);
+        boolean deleteResult = testPostService.delete(getPostId());
 
-        // then
         ArgumentCaptor<Integer> postIdArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(mockPostRepository).deleteById(postIdArgumentCaptor.capture());
         Integer capturedPostId = postIdArgumentCaptor.getValue();
 
-        assertEquals(postId, capturedPostId);
+        assertEquals(getPostId(), capturedPostId);
         assertTrue(deleteResult);
     }
 
     @Test
     public void shouldGetPostDtoByPostId() {
-        // given
-        Post post = new Post(1, "Post title", "Post content", LocalDateTime.now(),
-                null, List.of(new Label(1, "post")));
-        doReturn(post).when(mockPostRepository).getById(post.getId());
+        Post postEntity = getPostEntity();
+        doReturn(postEntity).when(mockPostRepository).getById(getPostEntity().getId());
 
-        // when
-        PostDto postDtoResult = testPostService.getById(post.getId());
+        PostDto postDtoResult = testPostService.getById(getPostEntity().getId());
 
-        // then
         ArgumentCaptor<Integer> postIdArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(mockPostRepository).getById(postIdArgumentCaptor.capture());
         Integer capturedPostId = postIdArgumentCaptor.getValue();
 
-        assertEquals(post.getId(), capturedPostId);
-        assertEquals(PostDto.fromEntity(post), postDtoResult);
+        assertEquals(postEntity.getId(), capturedPostId);
+        assertEquals(PostDto.fromEntity(postEntity), postDtoResult);
     }
 
     @Test
     public void shouldUpdatePostAndReturnUpdatedPost() {
-        // given
-        PostDto updatedPostDto = PostDto.builder()
-                .id(1)
-                .title("Post title")
-                .content("Post content")
-                .labels(Collections.emptyList())
-                .created(LocalDateTime.now())
-                .build();
+        PostDto postDto = getPostDto();
+        Post postEntity = postDto.toEntity();
+        Post updatedPostEntity = getUpdatedPostEntity();
+        doReturn(updatedPostEntity).when(mockPostRepository).update(postEntity);
 
-        Post updatedPost = new Post(
-                updatedPostDto.getId(),
-                updatedPostDto.getTitle(),
-                updatedPostDto.getContent(),
-                updatedPostDto.getCreated(),
-                LocalDateTime.now(),
-                Collections.emptyList()
-        );
+        PostDto updateResult = testPostService.update(postDto);
 
-        doReturn(updatedPost).when(mockPostRepository).update(updatedPostDto.toEntity());
-
-        // when
-        PostDto updateResult = testPostService.update(updatedPostDto);
-
-        // then
         ArgumentCaptor<Post> updatedPostArgumentCaptor = ArgumentCaptor.forClass(Post.class);
         verify(mockPostRepository).update(updatedPostArgumentCaptor.capture());
         Post capturedPost = updatedPostArgumentCaptor.getValue();
 
-        assertEquals(updatedPostDto.toEntity(), capturedPost);
-        assertEquals(PostDto.fromEntity(updatedPost), updateResult);
+        assertEquals(postEntity, capturedPost);
+        assertEquals(PostDto.fromEntity(updatedPostEntity), updateResult);
     }
 }

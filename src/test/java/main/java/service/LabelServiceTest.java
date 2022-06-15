@@ -15,7 +15,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -25,140 +26,124 @@ public class LabelServiceTest {
     private LabelRepository mockLabelRepository;
     @InjectMocks
     private LabelService testLabelService;
-    private static final LabelDto LABEL_DTO = LabelDto.builder()
-            .id(1)
-            .name("label")
-            .build();
-    private static final Label LABEL_ENTITY = LABEL_DTO.toEntity();
+
+    private LabelDto getLabelDto() {
+        return LabelDto.builder()
+                .id(1)
+                .name("label")
+                .build();
+    }
+
+    private Label getLabelEntity() {
+        return getLabelDto().toEntity();
+    }
+
+    private int getLabelId() {
+        return getLabelEntity().getId();
+    }
+
+    private List<Label> getLabelEntityList() {
+        return List.of(
+                new Label(1, "label1"),
+                new Label(2, "label2"));
+    }
+
+    private List<LabelDto> getLabelDtoList() {
+        return getLabelEntityList().stream()
+                .map(LabelDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    private int getPostId() {
+        return 1;
+    }
 
     @Test
     public void shouldGetAll() {
-        // when
         testLabelService.getAll();
-        // then
         verify(mockLabelRepository).getAll();
 
     }
 
     @Test
     public void shouldSaveLabelAndReturnLabelDto() {
-        // given
-        doReturn(LABEL_ENTITY).when(mockLabelRepository).save(LABEL_ENTITY);
+        doReturn(getLabelEntity()).when(mockLabelRepository).save(getLabelEntity());
 
-        // when
-        LabelDto saveResult = testLabelService.createLabel(LABEL_DTO);
+        LabelDto saveResult = testLabelService.createLabel(getLabelDto());
 
-        // then
         ArgumentCaptor<Label> labelArgumentCaptor = ArgumentCaptor.forClass(Label.class);
-
         verify(mockLabelRepository).save(labelArgumentCaptor.capture());
-
         Label capturedLabel = labelArgumentCaptor.getValue();
 
-        assertThat(capturedLabel).isEqualTo(LABEL_ENTITY);
-        assertThat(saveResult).isEqualTo(LABEL_DTO);
+        assertEquals(getLabelEntity(), capturedLabel);
+        assertEquals(getLabelDto(), saveResult);
     }
 
     @Test
     public void shouldUpdateLabelAndReturnUpdatedLabel() {
-        // given
-        doReturn(LABEL_ENTITY).when(mockLabelRepository).update(LABEL_ENTITY);
+        doReturn(getLabelEntity()).when(mockLabelRepository).update(getLabelEntity());
 
-        // when
-        LabelDto updateResult = testLabelService.updateLabel(LABEL_DTO);
+        LabelDto updateResult = testLabelService.updateLabel(getLabelDto());
 
-        // then
         ArgumentCaptor<Label> labelArgumentCaptor = ArgumentCaptor.forClass(Label.class);
-
         verify(mockLabelRepository).update(labelArgumentCaptor.capture());
-
         Label capturedLabel = labelArgumentCaptor.getValue();
 
-        assertThat(capturedLabel).isEqualTo(LABEL_ENTITY);
-        assertThat(updateResult).isEqualTo(LABEL_DTO);
+        assertEquals(getLabelEntity(), capturedLabel);
+        assertEquals(getLabelDto(), updateResult);
     }
 
     @Test
     public void shouldDeleteByIdAndReturnTrue() {
-        // given
-        int id = 1;
+        doReturn(true).when(mockLabelRepository).deleteById(getLabelId());
 
-        doReturn(true).when(mockLabelRepository).deleteById(id);
+        boolean deletedResult = testLabelService.deleteLabel(getLabelId());
 
-        // when
-        Boolean deletedResult = testLabelService.deleteLabel(id);
-
-        // then
         ArgumentCaptor<Integer> idArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(mockLabelRepository).deleteById(idArgumentCaptor.capture());
         Integer capturedId = idArgumentCaptor.getValue();
 
-        assertThat(capturedId).isEqualTo(id);
-        assertThat(deletedResult).isTrue();
+        assertEquals(getLabelId(), capturedId);
+        assertTrue(deletedResult);
     }
 
     @Test
     public void shouldGetAllLabels() {
-        // given
-        List<Label> labelEntities = List.of(
-                new Label(1, "label1"),
-                new Label(2, "label2"));
+        doReturn(getLabelEntityList()).when(mockLabelRepository).getAll();
 
-        List<LabelDto> labelDtoList = labelEntities.stream()
-                .map(LabelDto::fromEntity)
-                .collect(Collectors.toList());
-
-        doReturn(labelEntities).when(mockLabelRepository).getAll();
-
-        // when
         List<LabelDto> allLabelsListResult = testLabelService.getAll();
 
-        // then
-        assertThat(allLabelsListResult).isEqualTo(labelDtoList);
+        assertEquals(getLabelDtoList(), allLabelsListResult);
     }
 
     @Test
     public void shouldGetLabelById() {
-        // given
-        doReturn(LABEL_ENTITY).when(mockLabelRepository).getById(LABEL_ENTITY.getId());
+        doReturn(getLabelEntity()).when(mockLabelRepository).getById(getLabelEntity().getId());
 
-        // when
-        LabelDto resultLabelDto = testLabelService.getById(LABEL_ENTITY.getId());
+        LabelDto resultLabelDto = testLabelService.getById(getLabelEntity().getId());
 
-        // then
         ArgumentCaptor<Integer> idArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(mockLabelRepository).getById(idArgumentCaptor.capture());
         Integer capturedId = idArgumentCaptor.getValue();
 
-        assertThat(capturedId).isEqualTo(LABEL_ENTITY.getId());
-        assertThat(resultLabelDto).isEqualTo(LabelDto.fromEntity(LABEL_ENTITY));
+        assertEquals(getLabelEntity().getId(), capturedId);
+        assertEquals(LabelDto.fromEntity(getLabelEntity()), resultLabelDto);
     }
 
     @Test
     public void shouldGetLabelsByPostId() {
-        // given
-        int postId = 1;
-        List<Label> labelEntities = List.of(
-                new Label(1, "label1"),
-                new Label(2, "label2"));
-        List<LabelDto> labelDtoList = labelEntities.stream()
-                .map(LabelDto::fromEntity)
-                .collect(Collectors.toList());
+        doReturn(getLabelEntityList()).when(mockLabelRepository).getLabelsByPostId(getPostId());
 
-        doReturn(labelEntities).when(mockLabelRepository).getLabelsByPostId(postId);
+        List<LabelDto> labelsByPostIdResult = testLabelService.getLabelsByPostId(getPostId());
 
-        // when
-        List<LabelDto> labelsByPostIdResult = testLabelService.getLabelsByPostId(postId);
-
-        // then
         ArgumentCaptor<Integer> postIdArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(mockLabelRepository).getLabelsByPostId(postIdArgumentCaptor.capture());
         Integer capturedPostId = postIdArgumentCaptor.getValue();
 
-        assertThat(capturedPostId).isEqualTo(postId);
-        Iterator<LabelDto> iteratorExpected = labelDtoList.iterator();
+        assertEquals(getPostId(), capturedPostId);
+        Iterator<LabelDto> iteratorExpected = getLabelDtoList().iterator();
         for (LabelDto labelDto : labelsByPostIdResult) {
-            assertThat(labelDto).isEqualTo(iteratorExpected.next());
+            assertEquals(iteratorExpected.next(), labelDto);
         }
     }
 }
