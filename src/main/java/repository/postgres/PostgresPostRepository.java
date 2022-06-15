@@ -6,7 +6,8 @@ import repository.LabelRepository;
 import repository.PostRepository;
 import until.ConnectionManager;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,43 +53,40 @@ public class PostgresPostRepository implements PostRepository {
 
     @Override
     public Post getById(Integer id) {
-        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(FIND_BY_ID);
-        try {
+        try (var preparedStatement =
+                     ConnectionManager.getPreparedStatement(FIND_BY_ID)) {
             preparedStatement.setInt(1, id);
             var resultSet = preparedStatement.executeQuery();
             resultSet.next();
             return buildPost(resultSet);
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
-            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
     @Override
     public Post save(Post post) {
-        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatementWithGeneratedKeys(SAVE_POST);
-        try {
+        try (var preparedStatement =
+                     ConnectionManager.getPreparedStatementWithGeneratedKeys(SAVE_POST)) {
             preparedStatement.setString(1, post.getTitle());
             preparedStatement.setString(2, post.getContent());
             preparedStatement.executeUpdate();
             var resultSet = preparedStatement.getGeneratedKeys();
             resultSet.next();
-            post.setId(resultSet.getObject("id", Integer.class));
-            post.setCreated(resultSet.getObject("created", Timestamp.class).toLocalDateTime());
+            post.setId(resultSet.getInt("id"));
+            post.setCreated(resultSet.getTimestamp("created")
+                    .toLocalDateTime());
             matchPostWithLabels(post.getId(), post.getLabels());
             return post;
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
-            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
     @Override
     public Post update(Post post) {
-        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatementWithGeneratedKeys(UPDATE);
-        try {
+        try (var preparedStatement =
+                     ConnectionManager.getPreparedStatementWithGeneratedKeys(UPDATE)) {
             preparedStatement.setString(1, post.getTitle());
             preparedStatement.setString(2, post.getContent());
             preparedStatement.setInt(3, post.getId());
@@ -100,15 +98,13 @@ public class PostgresPostRepository implements PostRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
-            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
     @Override
     public List<Post> getAll() {
-        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(FIND_ALL);
-        try {
+        try (var preparedStatement =
+                     ConnectionManager.getPreparedStatement(FIND_ALL)) {
             var resultSet = preparedStatement.executeQuery();
             List<Post> posts = new ArrayList<>();
             while (resultSet.next()) {
@@ -117,15 +113,13 @@ public class PostgresPostRepository implements PostRepository {
             return posts;
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
-            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
     @Override
     public List<Post> getPostsByWriterId(Integer writerId) {
-        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(FIND_POSTS_BY_WRITER_ID);
-        try {
+        try (var preparedStatement =
+                     ConnectionManager.getPreparedStatement(FIND_POSTS_BY_WRITER_ID)) {
             preparedStatement.setInt(1, writerId);
             var resultSet = preparedStatement.executeQuery();
             List<Post> posts = new ArrayList<>();
@@ -135,35 +129,34 @@ public class PostgresPostRepository implements PostRepository {
             return posts;
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
-            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
     @Override
     public boolean deleteById(Integer id) {
-        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatementWithGeneratedKeys(DELETE_POST_BY_ID);
-        try {
+        try (var preparedStatement =
+                     ConnectionManager.getPreparedStatementWithGeneratedKeys(DELETE_POST_BY_ID)) {
             preparedStatement.setInt(1, id);
             preparedStatement.executeUpdate();
             preparedStatement.getGeneratedKeys();
             return true;
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
-            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
     private Post buildPost(ResultSet resultSet) {
         try {
             LocalDateTime updated = resultSet.getTimestamp("updated") == null
-                    ? null : resultSet.getObject("updated", Timestamp.class).toLocalDateTime();
+                    ? null : resultSet.
+                    getTimestamp("updated")
+                    .toLocalDateTime();
             return new Post(
-                    resultSet.getObject("id", Integer.class),
-                    resultSet.getObject("title", String.class),
-                    resultSet.getObject("content", String.class),
-                    resultSet.getObject("created", Timestamp.class).toLocalDateTime(),
+                    resultSet.getInt("id"),
+                    resultSet.getString("title"),
+                    resultSet.getString("content"),
+                    resultSet.getTimestamp("created")
+                            .toLocalDateTime(),
                     updated,
                     labelRepository.getLabelsByPostId(resultSet.getInt("id")));
         } catch (SQLException e) {
@@ -173,29 +166,24 @@ public class PostgresPostRepository implements PostRepository {
 
     @Override
     public void matchPostWithWriter(Integer postId, Integer writerId) {
-        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(MATCH_POST_WITH_WRITER);
-        try {
+        try (var preparedStatement =
+                     ConnectionManager.getPreparedStatement(MATCH_POST_WITH_WRITER)) {
             preparedStatement.setInt(1, writerId);
             preparedStatement.setInt(2, postId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
-            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
     @Override
     public void matchPostWithLabels(Integer postId, List<Label> labels) {
-        Statement statement = ConnectionManager.getStatement();
-        try {
+        try (var statement = ConnectionManager.getStatement()) {
             for (Label label : labels) {
                 statement.executeUpdate(String.format(MATCH_POST_WITH_LABEL, label.getId(), postId));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
-            ConnectionManager.closeConnection(statement);
         }
     }
 

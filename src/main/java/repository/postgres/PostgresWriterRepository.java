@@ -1,11 +1,11 @@
 package repository.postgres;
 
-import exceptions.LoginErrorException;
 import model.Writer;
 import repository.WriterRepository;
 import until.ConnectionManager;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -80,24 +80,22 @@ public class PostgresWriterRepository implements WriterRepository {
 
     @Override
     public Writer getById(Integer id) {
-        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(FIND_BY_ID);
-        try {
+        try (var preparedStatement =
+                     ConnectionManager.getPreparedStatement(FIND_BY_ID)) {
             preparedStatement.setInt(1, id);
             var resultSet = preparedStatement.executeQuery();
             resultSet.next();
             return buildWriter(resultSet);
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
-            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
     @Override
     public Writer save(Writer writer) {
         createDatabase();
-        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatementWithGeneratedKeys(SAVE);
-        try {
+        try (var preparedStatement =
+                     ConnectionManager.getPreparedStatementWithGeneratedKeys(SAVE)) {
             preparedStatement.setString(1, writer.getFirstName());
             preparedStatement.setString(2, writer.getLastName());
             preparedStatement.setString(3, writer.getEmail());
@@ -108,8 +106,6 @@ public class PostgresWriterRepository implements WriterRepository {
             return buildWriter(resultSet);
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
-            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
@@ -120,8 +116,8 @@ public class PostgresWriterRepository implements WriterRepository {
 
     @Override
     public List<Writer> getAll() {
-        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(FIND_ALL);
-        try {
+        try (var preparedStatement =
+                     ConnectionManager.getPreparedStatement(FIND_ALL)) {
             var resultSet = preparedStatement.executeQuery();
             List<Writer> writers = new ArrayList<>();
             while (resultSet.next()) {
@@ -130,15 +126,13 @@ public class PostgresWriterRepository implements WriterRepository {
             return writers;
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
-            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
     @Override
     public Optional<Writer> getWriterByEmail(String email) {
-        PreparedStatement preparedStatement = ConnectionManager.getPreparedStatement(FIND_BY_EMAIL);
-        try {
+        try (var preparedStatement =
+                     ConnectionManager.getPreparedStatement(FIND_BY_EMAIL)) {
             preparedStatement.setString(1, email);
             var resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
@@ -148,8 +142,6 @@ public class PostgresWriterRepository implements WriterRepository {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
-            ConnectionManager.closeConnection(preparedStatement);
         }
     }
 
@@ -166,18 +158,17 @@ public class PostgresWriterRepository implements WriterRepository {
 
     private Writer buildWriter(ResultSet resultSet) throws SQLException {
         return new Writer(
-                resultSet.getObject("id", Integer.class),
-                resultSet.getObject("first_name", String.class),
-                resultSet.getObject("last_name", String.class),
-                resultSet.getObject("email", String.class),
-                resultSet.getObject("password", String.class),
+                resultSet.getInt("id"),
+                resultSet.getString("first_name"),
+                resultSet.getString("last_name"),
+                resultSet.getString("email"),
+                resultSet.getString("password"),
                 null
         );
     }
 
     private static void createDatabase() {
-        Statement statement = ConnectionManager.getStatement();
-        try {
+        try (var statement = ConnectionManager.getStatement()) {
             statement.executeUpdate(CREATE_TABLE_WRITER);
             statement.executeUpdate(CREATE_TABLE_POST);
             statement.executeUpdate(CREATE_TABLE_LABEL);
@@ -186,8 +177,6 @@ public class PostgresWriterRepository implements WriterRepository {
 
         } catch (SQLException e) {
             // Database has been created
-        } finally {
-            ConnectionManager.closeConnection(statement);
         }
     }
 

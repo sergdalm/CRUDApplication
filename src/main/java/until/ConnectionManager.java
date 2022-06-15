@@ -2,7 +2,11 @@ package until;
 
 import lombok.SneakyThrows;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class ConnectionManager {
     private static final String URL_KEY = "db.url";
@@ -64,19 +68,11 @@ public class ConnectionManager {
         }
     }
 
-    public static void closeConnection(PreparedStatement preparedStatement) {
+    public static void closeConnection() {
         try {
-            ConnectionManager.connection.close();
-            preparedStatement.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void closeConnection(Statement statement) {
-        try {
-            ConnectionManager.connection.close();
-            statement.close();
+            if (!ConnectionManager.connection.isClosed()) {
+                ConnectionManager.connection.close();
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
