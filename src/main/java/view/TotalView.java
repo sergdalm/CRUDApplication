@@ -1,5 +1,7 @@
 package view;
 
+import until.ConnectionManager;
+
 public class TotalView {
     private final WriterView writerView;
     private final PostView postView;
@@ -19,34 +21,37 @@ public class TotalView {
 
     private Integer login() {
         System.out.println("Do you have an account? [y/n]");
-        if(inputManager.getYesOrNo()) {
+        if (inputManager.getYesOrNo()) {
             var writer = writerView.login();
             System.out.println(writer.getFirstName() + " " + writer.getLastName());
             return writer.getId();
-        }
-        else {
+        } else {
             return writerView.createWriter().getId();
         }
     }
 
     public void start() {
-        Integer input = EXIT_NUMBER - 1;
-        do {
-            showMenu();
-            input = inputManager.getNumberFromUserBetweenMinAndMax(0,MENU_OPTIONS);
-            switch (input) {
-                case(1) :
-                    postView.userPostsMenu(writerId);
-                    break;
-                case(2) :
-                    writersMenu();
-                    break;
-                case(3) :
-                    postView.showAllPosts();
-                    break;
-            }
+        try {
+            Integer input;
+            do {
+                showMenu();
+                input = inputManager.getNumberFromUserBetweenMinAndMax(0, MENU_OPTIONS);
+                switch (input) {
+                    case (1):
+                        postView.userPostsMenu(writerId);
+                        break;
+                    case (2):
+                        writersMenu();
+                        break;
+                    case (3):
+                        postView.showAllPosts();
+                        break;
+                }
 
-        } while(!input.equals(EXIT_NUMBER));
+            } while (!input.equals(EXIT_NUMBER));
+        } finally {
+            ConnectionManager.closeConnection();
+        }
     }
 
     private void showMenu() {
