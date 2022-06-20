@@ -11,16 +11,13 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="first_name" type="VARCHAR(128)">
-                <constraints primaryKey="false" nullable="false"/>
             </column>
             <column name="last_name" type="VARCHAR(128)">
-                <constraints primaryKey="false" nullable="false"/>
             </column>
             <column name="email" type="VARCHAR(128)">
                 <constraints primaryKey="false" nullable="false" unique="true"/>
             </column>
             <column name="password" type="VARCHAR(128)">
-                <constraints primaryKey="false" nullable="false"/>
             </column>
         </createTable>
     </changeSet>
@@ -30,13 +27,10 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="title" type="VARCHAR(220)">
-                <constraints primaryKey="false" nullable="false"/>
             </column>
             <column name="content" type="TEXT">
-                <constraints primaryKey="false" nullable="false"/>
             </column>
             <column name="created" type="Timestamp">
-                <constraints primaryKey="false" nullable="false"/>
             </column>
             <column name="updated" type="Timestamp"/>
         </createTable>
@@ -53,7 +47,7 @@
     </changeSet>
     <changeSet id="Creating Label" author="sergdalm">
         <createTable tableName="label">
-            <column name="id" type="INT">
+            <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(128)">
@@ -62,7 +56,7 @@
         </createTable>
     </changeSet>
     <changeSet id="Mapping labels with post" author="sergdalm">
-        <createTable tableName="">
+        <createTable tableName="label_post">
             <column name="label_id" type="int">
                 <constraints nullable="false" references="label(id)"/>
             </column>
