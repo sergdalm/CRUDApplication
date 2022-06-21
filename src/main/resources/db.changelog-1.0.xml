@@ -38,10 +38,10 @@
     <changeSet id="Mapping post to writer" author="sergdalm">
         <createTable tableName="writer_post">
             <column name="writer_id" type="int">
-                <constraints nullable="false" references="writer(id)"/>
+                <constraints nullable="false" foreignKeyName="writer_post_writer_id_fkey" references="writer(id)"/>
             </column>
             <column name="post_id" type="int">
-                <constraints nullable="false" references="post(id)"/>
+                <constraints nullable="false" foreignKeyName="writer_post_post_id_fkey" references="post(id)"/>
             </column>
         </createTable>
     </changeSet>
@@ -58,10 +58,10 @@
     <changeSet id="Mapping labels with post" author="sergdalm">
         <createTable tableName="label_post">
             <column name="label_id" type="int">
-                <constraints nullable="false" references="label(id)"/>
+                <constraints nullable="false" foreignKeyName="label_post_label_id_fkey" references="label(id)"/>
             </column>
             <column name="post_id" type="int">
-                <constraints nullable="false" references="post(id)"/>
+                <constraints nullable="false" foreignKeyName="label_post_post_id_fkey" references="post(id)"/>
             </column>
         </createTable>
     </changeSet>
