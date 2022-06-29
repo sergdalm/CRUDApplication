@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS label
+(
+    id   int          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name varchar(128) NOT NULL UNIQUE
+)
