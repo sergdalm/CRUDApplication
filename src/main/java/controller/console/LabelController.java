@@ -1,6 +1,7 @@
 package controller.console;
 
 import dto.LabelDto;
+import repository.hibernate.MysqlLabelRepository;
 import repository.postgres.PostgresLabelRepository;
 import service.LabelService;
 
@@ -9,7 +10,7 @@ import java.util.List;
 import static java.util.stream.Collectors.joining;
 
 public class LabelController {
-    private final LabelService labelService = new LabelService(PostgresLabelRepository.getInstance());
+    private final LabelService labelService = new LabelService(MysqlLabelRepository.getInstance());
 
     public LabelDto saveLabel(String name) {
         return labelService.createLabel(LabelDto.builder()

@@ -107,14 +107,4 @@ public class JsonWriterRepositoryImpl implements WriterRepository {
             return maxId + 1;
         }
     }
-
-    @Override
-    public Writer getWriterByName(String firstName, String lastName) {
-        List<Writer> writers = getAllWriters();
-        return writers.stream()
-                .filter(w -> w.getFirstName().equals(firstName))
-                .filter(w -> w.getLastName().equals(lastName))
-                .findFirst()
-                .orElse(null);
-    }
 }

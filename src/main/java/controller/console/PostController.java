@@ -2,6 +2,7 @@ package controller.console;
 
 import dto.LabelDto;
 import dto.PostDto;
+import repository.hibernate.MysqlPostRepository;
 import repository.postgres.PostgresPostRepository;
 import service.PostService;
 
@@ -10,7 +11,7 @@ import java.util.List;
 public class PostController {
     private static final PostController INSTANCE = new PostController();
 
-    private final PostService postService = new PostService(PostgresPostRepository.getInstance());
+    private final PostService postService = new PostService(MysqlPostRepository.getInstance());
 
     private PostController() {
     }

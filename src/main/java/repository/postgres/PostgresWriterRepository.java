@@ -150,12 +150,6 @@ public class PostgresWriterRepository implements WriterRepository {
         return false;
     }
 
-
-    @Override
-    public Writer getWriterByName(String firstName, String lastName) {
-        return null;
-    }
-
     private Writer buildWriter(ResultSet resultSet) throws SQLException {
         return new Writer(
                 resultSet.getInt("id"),

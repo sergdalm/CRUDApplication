@@ -66,4 +66,11 @@ public class Writer {
     public int hashCode() {
         return getClass().hashCode();
     }
+
+    public void update(Writer writer) {
+        this.firstName = writer.getFirstName();
+        this.lastName = writer.getLastName();
+        this.email = writer.getEmail();
+        this.password = writer.getPassword();
+    }
 }

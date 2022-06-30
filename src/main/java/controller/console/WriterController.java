@@ -3,6 +3,7 @@ package controller.console;
 import dto.LoginWriterDto;
 import dto.WriterDto;
 import exceptions.LoginErrorException;
+import repository.hibernate.MysqlWriterRepository;
 import repository.postgres.PostgresWriterRepository;
 import service.WriterService;
 
@@ -10,7 +11,7 @@ import java.util.List;
 
 
 public class WriterController {
-    WriterService writerService = new WriterService(PostgresWriterRepository.getInstance());
+    WriterService writerService = new WriterService(MysqlWriterRepository.getInstance());
 
     public LoginWriterDto saveWriter(String firstName, String lastName, String email, String password) {
         LoginWriterDto writer = LoginWriterDto.builder()

@@ -65,4 +65,10 @@ public class Post {
     public int hashCode() {
         return getClass().hashCode();
     }
+
+    public void update(Post post) {
+        this.title = post.getTitle();
+        this.content = post.getContent();
+        this.labels = post.getLabels();
+    }
 }
