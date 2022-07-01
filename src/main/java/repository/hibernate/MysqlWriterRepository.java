@@ -8,7 +8,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import repository.WriterRepository;
-import until.SessionFactoryUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +15,7 @@ import java.util.Optional;
 public class MysqlWriterRepository implements WriterRepository {
 
     private static final WriterRepository INSTANCE = new MysqlWriterRepository();
-    private static final SessionFactory sessionFactory = SessionFactoryUtil.getInstance();
+    private static final SessionFactory sessionFactory = SessionFactoryMaker.FACTORY.getSessionFactory();
 
     private MysqlWriterRepository() {
     }
@@ -40,11 +39,12 @@ public class MysqlWriterRepository implements WriterRepository {
     public Writer save(Writer writer) {
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
+        int id = -1;
         try {
             transaction = session.beginTransaction();
-            int id = (int) session.save(writer);
+            id = (int) session.save(writer);
             transaction.commit();
-            return session.get(Writer.class, id);
+
         } catch (Exception e) {
             e.printStackTrace();
             if (transaction != null) {
@@ -55,7 +55,9 @@ public class MysqlWriterRepository implements WriterRepository {
                 session.close();
             }
         }
-        return null;
+        if (id < 0)
+            return null;
+        return session.get(Writer.class, id);
     }
 
     @Override

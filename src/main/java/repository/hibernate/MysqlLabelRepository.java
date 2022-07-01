@@ -5,13 +5,12 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import repository.LabelRepository;
-import until.SessionFactoryUtil;
 
 import java.util.List;
 
 public class MysqlLabelRepository implements LabelRepository {
     private final static LabelRepository INSTANCE = new MysqlLabelRepository();
-    private static final SessionFactory sessionFactory = SessionFactoryUtil.getInstance();
+    private static final SessionFactory sessionFactory = SessionFactoryMaker.FACTORY.getSessionFactory();
 
     private MysqlLabelRepository() {
     }

@@ -6,13 +6,12 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import repository.PostRepository;
-import until.SessionFactoryUtil;
 
 import java.util.List;
 
 public class MysqlPostRepository implements PostRepository {
     private final static PostRepository INSTANCE = new MysqlPostRepository();
-    private static final SessionFactory sessionFactory = SessionFactoryUtil.getInstance();
+    private static final SessionFactory sessionFactory = SessionFactoryMaker.FACTORY.getSessionFactory();
 
     private MysqlPostRepository() {
     }
