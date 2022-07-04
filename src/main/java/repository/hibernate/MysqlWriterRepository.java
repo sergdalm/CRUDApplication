@@ -39,12 +39,12 @@ public class MysqlWriterRepository implements WriterRepository {
     public Writer save(Writer writer) {
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
-        int id = -1;
+        int id;
         try {
             transaction = session.beginTransaction();
             id = (int) session.save(writer);
             transaction.commit();
-
+            return session.get(Writer.class, id);
         } catch (Exception e) {
             e.printStackTrace();
             if (transaction != null) {
@@ -55,9 +55,7 @@ public class MysqlWriterRepository implements WriterRepository {
                 session.close();
             }
         }
-        if (id < 0)
-            return null;
-        return session.get(Writer.class, id);
+        return null;
     }
 
     @Override
