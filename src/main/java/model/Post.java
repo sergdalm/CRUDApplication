@@ -13,8 +13,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,7 +23,8 @@ import java.util.Objects;
 
 @Getter
 @Setter
-@NoArgsConstructor
+@ToString
+@RequiredArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
@@ -51,6 +53,7 @@ public class Post {
             @JoinColumn(name = "POST_ID")}, inverseJoinColumns = {
             @JoinColumn(name = "LABEL_ID")
     })
+    @ToString.Exclude
     private List<Label> labels;
 
     @Override
