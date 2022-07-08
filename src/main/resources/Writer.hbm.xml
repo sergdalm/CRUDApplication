@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="model.Writer" table="WRITER">
+        <meta attribute="class-description">
+            This class contains writer's details.
+        </meta>
+        <id name="id" type="int" column="ID">
+            <generator class="native"/>
+        </id>
+        <list name="posts" cascade="all">
+            <key column="WRITER_ID"/>
+            <list-index column="idx"/>
+            <one-to-many class="model.Post"/>
+        </list>
+        <property name="firstName" column="FIRST_NAME" type="string"/>
+        <property name="lastName" column="LAST_NAME" type="string"/>
+        <property name="email" column="EMAIL" type="string"/>
+        <property name="password" column="PASSWORD" type="string"/>
+    </class>
+    <class name="model.Post" table="POST">
+        <meta attribute="class-description">
+            This class contains post's records.
+        </meta>
+        <id name="id" type="int" column="id">
+            <generator class="native"/>
+        </id>
+        <property name="title" column="TITLE" type="string"/>
+        <property name="content" column="CONTENT" type="string"/>
+        <property name="created" column="CREATED" type="timestamp"/>
+        <property name="updated" column="UPDATED" type="timestamp"/>
+    </class>
+</hibernate-mapping>
